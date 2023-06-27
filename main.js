@@ -6,6 +6,9 @@ import {DualQuaternion} from './DualQuaternion.js';
 import CMap2 from './CMapJS/CMap/CMap2.js';
 import catmullClark from './CMapJS/Modeling/Subdivision/Surface/CatmullClark.js';
 import { cutAllEdges, quadrangulateAllFaces, quadrangulateFace } from './CMapJS/Utils/Subdivision.js';
+import { loadCMap2 } from './CMapJS/IO/SurfaceFormats/CMap2IO.js';
+import { icosahedron_off } from './off_files.js';
+
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xeeeeee);
@@ -124,70 +127,91 @@ const dq7 = new DualQuaternion(r7, t7.clone().multiply(r7).multiplyScalar(0.5));
 // const dq7 = new DualQuaternion(r4, t7.clone().multiply(r4).multiplyScalar(0.5));
 
 
-const map = new CMap2();
-let d = map.addPrism(4);
-map.setEmbeddings(map.vertex);
-const pos = map.addAttribute(map.vertex, "position");
+// const map = new CMap2();
+// let d = map.addPrism(4);
+// map.setEmbeddings(map.vertex);
+// const pos = map.addAttribute(map.vertex, "position");
 
-let vid = map.cell(map.vertex, d);
-pos[vid] = new THREE.Vector3(t0.x, t0.y, t0.z);
-d = map.phi1[d]; vid = map.cell(map.vertex, d);
-pos[vid] = new THREE.Vector3(t1.x, t1.y, t1.z);
-d = map.phi1[d];  vid = map.cell(map.vertex, d);
-pos[vid] = new THREE.Vector3(t2.x, t2.y, t2.z);
-d = map.phi1[d];  vid = map.cell(map.vertex, d);
-pos[vid] = new THREE.Vector3(t3.x, t3.y, t3.z);
-d = map.phi([2, 1, 1, 2], d);  vid = map.cell(map.vertex, d);
-pos[vid] = new THREE.Vector3(t4.x, t4.y, t4.z);
-d = map.phi1[d];  vid = map.cell(map.vertex, d);
-pos[vid] = new THREE.Vector3(t5.x, t5.y, t5.z);
-d = map.phi1[d];  vid = map.cell(map.vertex, d);
-pos[vid] = new THREE.Vector3(t6.x, t6.y, t6.z);
-d = map.phi1[d];  vid = map.cell(map.vertex, d);
-pos[vid] = new THREE.Vector3(t7.x, t7.y, t7.z);
+// let vid = map.cell(map.vertex, d);
+// pos[vid] = new THREE.Vector3(t0.x, t0.y, t0.z);
+// d = map.phi1[d]; vid = map.cell(map.vertex, d);
+// pos[vid] = new THREE.Vector3(t1.x, t1.y, t1.z);
+// d = map.phi1[d];  vid = map.cell(map.vertex, d);
+// pos[vid] = new THREE.Vector3(t2.x, t2.y, t2.z);
+// d = map.phi1[d];  vid = map.cell(map.vertex, d);
+// pos[vid] = new THREE.Vector3(t3.x, t3.y, t3.z);
+// d = map.phi([2, 1, 1, 2], d);  vid = map.cell(map.vertex, d);
+// pos[vid] = new THREE.Vector3(t4.x, t4.y, t4.z);
+// d = map.phi1[d];  vid = map.cell(map.vertex, d);
+// pos[vid] = new THREE.Vector3(t5.x, t5.y, t5.z);
+// d = map.phi1[d];  vid = map.cell(map.vertex, d);
+// pos[vid] = new THREE.Vector3(t6.x, t6.y, t6.z);
+// d = map.phi1[d];  vid = map.cell(map.vertex, d);
+// pos[vid] = new THREE.Vector3(t7.x, t7.y, t7.z);
 
+const map = loadCMap2("off", icosahedron_off);
 
-const mapDQ = new CMap2();
-d = mapDQ.addPrism(4);
-mapDQ.setEmbeddings(mapDQ.vertex);
+let d;
+
+const mapDQ = loadCMap2("off", icosahedron_off);
 mapDQ.setEmbeddings(mapDQ.edge);
 mapDQ.setEmbeddings(mapDQ.face);
-const DQpos = mapDQ.addAttribute(mapDQ.vertex, "position");
+const DQpos = mapDQ.getAttribute(mapDQ.vertex, "position");
 const DQs = mapDQ.addAttribute(mapDQ.vertex, "dq");
 
-vid = map.cell(map.vertex, d);
 
-DQs[vid] = dq0;
-DQpos[vid] = dq0.transform(world0);
-d = map.phi1[d]; vid = map.cell(map.vertex, d);
-DQs[vid] = dq1;
-DQpos[vid] = dq1.transform(world0);
-d = map.phi1[d]; vid = map.cell(map.vertex, d);
-DQs[vid] = dq2;
-DQpos[vid] = dq2.transform(world0);
-d = map.phi1[d]; vid = map.cell(map.vertex, d);
-DQs[vid] = dq3;
-DQpos[vid] = dq3.transform(world0);
-d = map.phi([2, 1, 1, 2], d); vid = map.cell(map.vertex, d);
-DQs[vid] = dq4;
-DQpos[vid] = dq4.transform(world0);
-d = map.phi1[d]; vid = map.cell(map.vertex, d);
-DQs[vid] = dq5;
-DQpos[vid] = dq5.transform(world0);
-d = map.phi1[d]; vid = map.cell(map.vertex, d);
-DQs[vid] = dq6;
-DQpos[vid] = dq6.transform(world0);
-d = map.phi1[d]; vid = map.cell(map.vertex, d);
-DQs[vid] = dq7;
-DQpos[vid] = dq7.transform(world0);
+mapDQ.foreach(mapDQ.vertex, vd => {
+	const vid = mapDQ.cell(mapDQ.vertex, vd);
+	const t = DQpos[vid].clone();
+	const trans = new THREE.Quaternion(t.x, t.y, t.z);
+	const unitT = trans.clone().normalize();
+	const rot = new THREE.Quaternion().setFromUnitVectors(worldY, new THREE.Vector3(trans.x, trans.y, trans.z).normalize());
+
+	DQs[vid] = new DualQuaternion(rot, trans.clone().multiply(rot).multiplyScalar(0.5));
 
 
+});
+
+// const mapDQ = new CMap2();
+// d = mapDQ.addPrism(4);
+// mapDQ.setEmbeddings(mapDQ.vertex);
+// mapDQ.setEmbeddings(mapDQ.edge);
+// mapDQ.setEmbeddings(mapDQ.face);
+// const DQpos = mapDQ.addAttribute(mapDQ.vertex, "position");
+// const DQs = mapDQ.addAttribute(mapDQ.vertex, "dq");
+
+// let vid = map.cell(map.vertex, d);
+
+// DQs[vid] = dq0;
+// DQpos[vid] = dq0.transform(world0);
+// d = map.phi1[d]; vid = map.cell(map.vertex, d);
+// DQs[vid] = dq1;
+// DQpos[vid] = dq1.transform(world0);
+// d = map.phi1[d]; vid = map.cell(map.vertex, d);
+// DQs[vid] = dq2;
+// DQpos[vid] = dq2.transform(world0);
+// d = map.phi1[d]; vid = map.cell(map.vertex, d);
+// DQs[vid] = dq3;
+// DQpos[vid] = dq3.transform(world0);
+// d = map.phi([2, 1, 1, 2], d); vid = map.cell(map.vertex, d);
+// DQs[vid] = dq4;
+// DQpos[vid] = dq4.transform(world0);
+// d = map.phi1[d]; vid = map.cell(map.vertex, d);
+// DQs[vid] = dq5;
+// DQpos[vid] = dq5.transform(world0);
+// d = map.phi1[d]; vid = map.cell(map.vertex, d);
+// DQs[vid] = dq6;
+// DQpos[vid] = dq6.transform(world0);
+// d = map.phi1[d]; vid = map.cell(map.vertex, d);
+// DQs[vid] = dq7;
+// DQpos[vid] = dq7.transform(world0);
 
 
 
 
 
-catmullClark(map)
+
+
 
 
 
@@ -244,7 +268,7 @@ function edgesDQ() {
 		dq1 = DQs[mapDQ.cell(vertex, mapDQ.phi2[ed])];
 
 		for(let i = 0; i < nbDivs + 1; ++i) {
-			dq.lerpDualQuaternions(dq0, dq1, i / nbDivs).normalize()
+			dq.slerpDualQuaternions(dq0, dq1, i / nbDivs).normalize()
 			matrix.compose(dq.getTranslation(), dq.getRotation(), scale);
 			conesEdges.setMatrixAt(eid * (nbDivs+1) + i, matrix);
 
@@ -280,10 +304,10 @@ function facesDQ() {
 		dq3 = DQs[mapDQ.cell(vertex, d)];
 
 		for(let i = 0; i < nbDivs + 1; ++i) {
-			dq01.lerpDualQuaternionsShortest(dq0, dq1, i / nbDivs).normalize();
-			dq32.lerpDualQuaternionsShortest(dq3, dq2, i / nbDivs).normalize();
+			dq01.lerpDualQuaternions(dq0, dq1, i / nbDivs).normalize();
+			dq32.lerpDualQuaternions(dq3, dq2, i / nbDivs).normalize();
 			for(let j = 0; j < nbDivs + 1; ++j) {
-				dq.lerpDualQuaternionsShortest(dq01, dq32, j / nbDivs).normalize();
+				dq.lerpDualQuaternions(dq01, dq32, j / nbDivs).normalize();
 
 				matrix.compose(dq.getTranslation(), dq.getRotation(), scale);
 				conesFaces.setMatrixAt(fid *(nbDivs+1)*(nbDivs+1) + ((nbDivs+1) * i + j), matrix);
@@ -398,15 +422,16 @@ function catmullClarkDQ() {
 
 
 
+// catmullClark(map)
 
 
-// catmullClarkDQ()
-// catmullClarkDQ()
-// catmullClarkDQ()
+catmullClarkDQ()
+catmullClarkDQ()
+catmullClarkDQ()
 
 verticesDQ()
-edgesDQ()
-facesDQ();
+// edgesDQ()
+// facesDQ();
 
 
 

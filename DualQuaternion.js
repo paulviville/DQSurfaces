@@ -152,8 +152,8 @@ class DualQuaternion {
 
 	lerp( dq, t ) {
 
-		this.real.multiplyScalar(t).add(dq.real.clone().multiplyScalar(1 - t));
-		this.dual.multiplyScalar(t).add(dq.dual.clone().multiplyScalar(1 - t));
+		this.real.multiplyScalar(1-t).add(dq.real.clone().multiplyScalar(t));
+		this.dual.multiplyScalar(1-t).add(dq.dual.clone().multiplyScalar(t));
 
 		return this;
 
@@ -163,10 +163,11 @@ class DualQuaternion {
 		const dqTemp = dq.clone();
 
 		if(this.real.dot(dqTemp.real) < 0)
-			dqTemp.multiplyScalar(-1);
+			t = -t
+			// dqTemp.multiplyScalar(-1);
 
-		this.real.multiplyScalar(t).add(dqTemp.real.multiplyScalar(1 - t));
-		this.dual.multiplyScalar(t).add(dqTemp.dual.multiplyScalar(1 - t));
+		this.real.multiplyScalar(1-t).add(dqTemp.real.multiplyScalar(t));
+		this.dual.multiplyScalar(1-t).add(dqTemp.dual.multiplyScalar(t));
 
 		return this;
 
@@ -277,6 +278,26 @@ class DualQuaternion {
 	premultiply( dq ) {
 
 		this.multiplyDualQuaternions( dq, this );
+
+		return this;
+
+	}
+
+
+	slerp( dq, t ) {
+		const omega = this.real.dot(dq.real);
+		
+		this.real.multiplyScalar(1-t).add(dq.real.clone().multiplyScalar(t));
+		this.dual.multiplyScalar(1-t).add(dq.dual.clone().multiplyScalar(t));
+
+		return this;
+
+	}
+
+	slerpDualQuaternions( dq0, dq1, t) {
+
+		this.copy(dq0);
+		this.slerp(dq1, t);
 
 		return this;
 
