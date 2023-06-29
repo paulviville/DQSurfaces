@@ -18,9 +18,9 @@ const renderer = new THREE.WebGLRenderer({antialias: true});
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
 
-let ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+let ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
 scene.add(ambientLight);
-let pointLight0 = new THREE.PointLight(0xffffff, 1);
+let pointLight0 = new THREE.PointLight(0xffffff, 1.5);
 pointLight0.position.set(10,8,5);
 scene.add(pointLight0);
 
@@ -132,38 +132,46 @@ for(let i = 0; i < 4; ++i) {
 
 
 const samples = [];
-const nbSamples = 100;
+const nbSamples = 400;
 
-function bezierPatch() {
-	const step = 1/ (nbSamples - 1);
 
+
+function polyInter() {
+
+	const U = [0, 0.33, 0.66, 1];
+	const V = [0, 0.33, 0.66, 1];
+
+	const step = 1 / (nbSamples - 1);
 	const curves = [];
+	
 	for(let line = 0; line < 4; ++line) {
 		curves[line] = [];
 		let id = 4*line;
-		let p0 = DQ[id].clone();
-		let p1 = DQ[id+1].clone();
-		let p2 = DQ[id+2].clone();
-		let p3 = DQ[id+3].clone();
-		let p0_ = new DualQuaternion();
-		let p1_ = new DualQuaternion();
-		let p2_ = new DualQuaternion();
-		for(let t = 0; t < nbSamples; ++t) {
-			const r = t*step
-			// let c = new DualQuaternion();
-			p0_.lerpDualQuaternions(p0, p1, r);
-			p1_.lerpDualQuaternions(p1, p2, r);
-			p2_.lerpDualQuaternions(p2, p3, r);
-			p0_.lerpDualQuaternions(p0_, p1_, r);
-			p1_.lerpDualQuaternions(p1_, p2_, r);
-			p0_.lerpDualQuaternions(p0_, p1_, r);
-			curves[line].push(p0_.clone())
-			// samples.push(p0_.clone())
+		const dqs = [DQ[id].clone(), DQ[id+1].clone(), DQ[id+2].clone(), DQ[id+3].clone()];
+
+		for(let r = 0; r < nbSamples; ++r) {
+			const t = r*step;
+			const dqs2 = dqs.map(dq => dq.clone())
+			for(let i = 0; i < dqs.length - 1; ++i) {
+				for(let j = 0; j < dqs.length - i - 1; ++j) {
+					let t0 = j;
+					let t1 = i + j + 1;
+
+					// console.log(t0, t1)
+
+					let c0 = (U[t1]-t) / (U[t1]-U[t0]);
+					let c1 = (t-U[t0]) / (U[t1]-U[t0]);
+
+					dqs2[j].multiplyScalar(c0);
+					dqs2[j].addScaledDualQuaternion(dqs2[j+1], c1);
+				}
+			}
+			curves[line].push(dqs2[0])
 		}
 	}
 
 	for(let s = 0; s < nbSamples; ++s) {
-		// curves[s] = [];
+		const dqs = [curves[0][s].clone(), curves[1][s].clone(), curves[2][s].clone(), curves[3][s].clone()];
 		let p0 = curves[0][s].clone();
 		let p1 = curves[1][s].clone();
 		let p2 = curves[2][s].clone();
@@ -171,135 +179,31 @@ function bezierPatch() {
 		let p0_ = new DualQuaternion();
 		let p1_ = new DualQuaternion();
 		let p2_ = new DualQuaternion();
-		for(let t = 0; t < nbSamples; ++t) {
-			const r = t*step
-			p0_.lerpDualQuaternions(p0, p1, r);
-			p1_.lerpDualQuaternions(p1, p2, r);
-			p2_.lerpDualQuaternions(p2, p3, r);
-			p0_.lerpDualQuaternions(p0_, p1_, r);
-			p1_.lerpDualQuaternions(p1_, p2_, r);
-			p0_.lerpDualQuaternions(p0_, p1_, r);
-			// samples.push(p0_.clone())
-			samples[s * nbSamples + t] = p0_.clone()
+		for(let r = 0; r < nbSamples; ++r) {
+			const t = r*step;
+			const dqs2 = dqs.map(dq => dq.clone())
+			for(let i = 0; i < dqs.length - 1; ++i) {
+				for(let j = 0; j < dqs.length - i - 1; ++j) {
+					let t0 = j;
+					let t1 = i + j + 1;
+
+					let c0 = (U[t1]-t) / (U[t1]-U[t0]);
+					let c1 = (t-U[t0]) / (U[t1]-U[t0]);
+
+					dqs2[j].multiplyScalar(c0);
+					dqs2[j].addScaledDualQuaternion(dqs2[j+1], c1);
+				}
+			}
+			samples[s * nbSamples + r] = dqs2[0].clone()
 		}
+
 	}
 }
 
-// bezierPatch()
+polyInter()
 
-function WbezierPatch() {
-	const step = 1/ (nbSamples - 1);
 
-	const curves = [];
-	const curvesW = [];
-	for(let line = 0; line < 4; ++line) {
-		curves[line] = [];
-		curvesW[line] = [];
-		let id = 4*line;
-		let p0 = DQ[id].clone();
-		let w0 = W[id]
-		let p1 = DQ[id+1].clone();
-		let w1 = W[id+1]
-		let p2 = DQ[id+2].clone();
-		let w2 = W[id+2]
-		let p3 = DQ[id+3].clone();
-		let w3 = W[id+3]
-		let w0_, w1_, w2_;
-		let p0_ = new DualQuaternion();
-		let p1_ = new DualQuaternion();
-		let p2_ = new DualQuaternion();
-		for(let t = 0; t < nbSamples; ++t) {
-			const r = t*step
-			// let c = new DualQuaternion();
-			
-			// p0_.lerpDualQuaternions(p0, p1, r);
-			p0_.copy(p0).multiplyScalar((1-r)*w0);
-			p0_.addScaledDualQuaternion(p1, r*w1)
-			w0_ = (1-r)*w0 + r*w1;
 
-			// p1_.lerpDualQuaternions(p1, p2, r);
-			p1_.copy(p1).multiplyScalar((1-r)*w1);
-			p1_.addScaledDualQuaternion(p2, r*w2)
-			w1_ = (1-r)*w1 + r*w2;
-
-			// p2_.lerpDualQuaternions(p2, p3, r);
-			p2_.copy(p2).multiplyScalar((1-r)*w2);
-			p2_.addScaledDualQuaternion(p3, r*w3)
-			w2_ = (1-r)*w2 + r*w3;
-
-			// p0_.lerpDualQuaternions(p0_, p1_, r);
-			p0_.multiplyScalar((1-r)*w0_);
-			p0_.addScaledDualQuaternion(p1_, r*w1_)
-			w0_ = (1-r)*w0_ + r*w1_;
-
-			// p1_.lerpDualQuaternions(p1_, p2_, r);
-			p1_.multiplyScalar((1-r)*w1_);
-			p1_.addScaledDualQuaternion(p2_, r*w2_)
-			w1_ = (1-r)*w1_ + r*w2_;
-
-			// p0_.lerpDualQuaternions(p0_, p1_, r);
-			p0_.multiplyScalar((1-r)*w0_);
-			p0_.addScaledDualQuaternion(p1_, r*w1_)
-			w0_ = (1-r)*w0_ + r*w1_;
-
-			curves[line].push(p0_.clone())
-			curvesW[line].push(w0_);
-			// samples.push(p0_.clone())
-		}
-	}
-
-	for(let s = 0; s < nbSamples; ++s) {
-		// curves[s] = [];
-		let p0 = curves[0][s].clone();
-		let p1 = curves[1][s].clone();
-		let p2 = curves[2][s].clone();
-		let p3 = curves[3][s].clone();
-		let w0 = curvesW[0][s];
-		let w1 = curvesW[1][s];
-		let w2 = curvesW[2][s];
-		let w3 = curvesW[3][s];
-		let p0_ = new DualQuaternion();
-		let p1_ = new DualQuaternion();
-		let p2_ = new DualQuaternion();
-		let w0_, w1_, w2_;
-		for(let t = 0; t < nbSamples; ++t) {
-			const r = t*step
-			// p0_.lerpDualQuaternions(p0, p1, r);
-			p0_.copy(p0).multiplyScalar((1-r)*w0);
-			p0_.addScaledDualQuaternion(p1, r*w1)
-			w0_ = (1-r)*w0 + r*w1;
-
-			// p1_.lerpDualQuaternions(p1, p2, r);
-			p1_.copy(p1).multiplyScalar((1-r)*w1);
-			p1_.addScaledDualQuaternion(p2, r*w2)
-			w1_ = (1-r)*w1 + r*w2;
-
-			// p2_.lerpDualQuaternions(p2, p3, r);
-			p2_.copy(p2).multiplyScalar((1-r)*w2);
-			p2_.addScaledDualQuaternion(p3, r*w3)
-			w2_ = (1-r)*w2 + r*w3;
-
-			// p0_.lerpDualQuaternions(p0_, p1_, r);
-			p0_.multiplyScalar((1-r)*w0_);
-			p0_.addScaledDualQuaternion(p1_, r*w1_)
-			w0_ = (1-r)*w0_ + r*w1_;
-
-			// p1_.lerpDualQuaternions(p1_, p2_, r);
-			p1_.multiplyScalar((1-r)*w1_);
-			p1_.addScaledDualQuaternion(p2_, r*w2_)
-			w1_ = (1-r)*w1_ + r*w2_;
-
-			// p0_.lerpDualQuaternions(p0_, p1_, r);
-			p0_.multiplyScalar((1-r)*w0_);
-			p0_.addScaledDualQuaternion(p1_, r*w1_)
-			// samples.push(p0_.clone())
-			p0_.normalize()
-			samples[s * nbSamples + t] = p0_.clone()
-		}
-	}
-}
-
-WbezierPatch()
 
 
 
@@ -313,14 +217,17 @@ function setCones() {
 	const matrix = new THREE.Matrix4
 	for(let i = 0; i < 16; ++i) {
 		matrix.compose(DQ[i].getTranslation(), DQ[i].getRotation(), scale);
+		let dir = new THREE.Vector3(0, 1, 0).applyQuaternion(DQ[i].getRotation());
 		conesDQ.setMatrixAt(i, matrix);
+		conesDQ.setColorAt(i, new THREE.Color(Math.abs(dir.x), Math.abs(dir.y), Math.abs(dir.z)))
 	}
 	conesDQ.instanceMatrix.needsUpdate = true
+	conesDQ.instanceColor.needsUpdate = true
 }
 setCones();
 
-const geometrySample = new THREE.BoxGeometry(0.012, 0.0003125, 0.012, 16, 1);
-// const geometryDisc = new THREE.ConeGeometry(0.005, 0.0025, 16, 1);
+const geometrySample = new THREE.BoxGeometry(0.012, 0.00003125, 0.012, 16, 1);
+// const geometrySample = new THREE.ConeGeometry(0.005, 0.025, 16, 1);
 
 const samplesDQ = new THREE.InstancedMesh(geometrySample, grey, nbSamples*nbSamples);
 scene.add(samplesDQ)
@@ -331,9 +238,11 @@ function setSamples() {
 	for(let s = 0; s < samples.length; ++s) {
 		matrix.compose(samples[s].getTranslation(), samples[s].getRotation(), scale);
 		samplesDQ.setMatrixAt(s, matrix);
-		
+		let dir = new THREE.Vector3(0, 1, 0).applyQuaternion(samples[s].getRotation());
+		samplesDQ.setColorAt(s, new THREE.Color(Math.abs(dir.x), Math.abs(dir.y), Math.abs(dir.z)))
 	}
 	samplesDQ.instanceMatrix.needsUpdate = true
+	samplesDQ.instanceColor.needsUpdate = true
 }
 setSamples()
 
@@ -342,7 +251,7 @@ window.randRotate = function(i)  {
 	R[i] = randomize(R[i]);
 	DQ[i] = new DualQuaternion(R[i], T[i].clone().multiply(R[i]).multiplyScalar(0.5));
 
-	WbezierPatch()
+	polyInter()
 	setCones();
 	setSamples();
 }
@@ -352,14 +261,14 @@ window.randTrans = function(i) {
 	// R[i] = randomize(R[i]);
 	DQ[i] = new DualQuaternion(R[i], T[i].clone().multiply(R[i]).multiplyScalar(0.5));
 
-	WbezierPatch()
+	polyInter()
 	setCones();
 	setSamples();
 }
 
 window.setWeight = function(i, w) {
 	W[i] = w;
-	WbezierPatch()
+	polyInter()
 	setCones();
 	setSamples();
 }
