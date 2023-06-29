@@ -132,7 +132,7 @@ for(let i = 0; i < 4; ++i) {
 
 
 const samples = [];
-const nbSamples = 400;
+const nbSamples = 250;
 
 
 
@@ -217,12 +217,12 @@ function setCones() {
 	const matrix = new THREE.Matrix4
 	for(let i = 0; i < 16; ++i) {
 		matrix.compose(DQ[i].getTranslation(), DQ[i].getRotation(), scale);
-		let dir = new THREE.Vector3(0, 1, 0).applyQuaternion(DQ[i].getRotation());
+		// let dir = new THREE.Vector3(0, 1, 0).applyQuaternion(DQ[i].getRotation());
 		conesDQ.setMatrixAt(i, matrix);
-		conesDQ.setColorAt(i, new THREE.Color(Math.abs(dir.x), Math.abs(dir.y), Math.abs(dir.z)))
+		// conesDQ.setColorAt(i, new THREE.Color(Math.abs(dir.x), Math.abs(dir.y), Math.abs(dir.z)))
 	}
 	conesDQ.instanceMatrix.needsUpdate = true
-	conesDQ.instanceColor.needsUpdate = true
+	// conesDQ.instanceColor.needsUpdate = true
 }
 setCones();
 
