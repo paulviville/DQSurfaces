@@ -187,8 +187,8 @@ function polyInter() {
 					let t0 = j;
 					let t1 = i + j + 1;
 
-					let c0 = (U[t1]-t) / (U[t1]-U[t0]);
-					let c1 = (t-U[t0]) / (U[t1]-U[t0]);
+					let c0 = (V[t1]-t) / (V[t1]-V[t0]);
+					let c1 = (t-V[t0]) / (V[t1]-V[t0]);
 
 					dqs2[j].multiplyScalar(c0);
 					dqs2[j].addScaledDualQuaternion(dqs2[j+1], c1);
