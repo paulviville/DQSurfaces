@@ -9,6 +9,8 @@ import { cutAllEdges, quadrangulateAllFaces, quadrangulateFace } from './CMapJS/
 import { loadCMap2 } from './CMapJS/IO/SurfaceFormats/CMap2IO.js';
 import { cube_off, icosahedron_off } from './off_files.js';
 
+import * as DAT from './CMapJS/Libs/dat.gui.module.js';
+
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xeeeeee);
@@ -256,6 +258,131 @@ window.randRotate = function(i)  {
 	setSamples();
 }
 
+let selected = 0;
+const controls = {
+rotX: function() {
+	const rot = new THREE.Quaternion().setFromAxisAngle(worldX, 0.2);
+	const dq = DualQuaternion.setFromRotation(rot);
+	DQ[selected].multiply(dq).normalize();
+
+	polyInter()
+	setCones();
+	setSamples();
+},
+
+rot_X: function(i) {
+	const rot = new THREE.Quaternion().setFromAxisAngle(worldX, -0.2);
+	const dq = DualQuaternion.setFromRotation(rot);
+	DQ[selected].multiply(dq).normalize();
+
+	polyInter()
+	setCones();
+	setSamples();
+},
+
+rotY: function(i) {
+	const rot = new THREE.Quaternion().setFromAxisAngle(worldY, 0.2);
+	const dq = DualQuaternion.setFromRotation(rot);
+	DQ[selected].multiply(dq).normalize();
+
+	polyInter()
+	setCones();
+	setSamples();
+},
+
+rot_Y: function(i) {
+	const rot = new THREE.Quaternion().setFromAxisAngle(worldY, -0.2);
+	const dq = DualQuaternion.setFromRotation(rot);
+	DQ[selected].multiply(dq).normalize();
+
+	polyInter()
+	setCones();
+	setSamples();
+},
+
+rotZ: function(i) {
+	const rot = new THREE.Quaternion().setFromAxisAngle(worldZ, 0.2);
+	const dq = DualQuaternion.setFromRotation(rot);
+	DQ[selected].multiply(dq).normalize();
+
+	polyInter()
+	setCones();
+	setSamples();
+},
+
+rot_Z: function(i) {
+	const rot = new THREE.Quaternion().setFromAxisAngle(worldZ, -0.5);
+	const dq = DualQuaternion.setFromRotation(rot);
+	DQ[selected].multiply(dq).normalize();
+
+	polyInter()
+	setCones();
+	setSamples();
+},
+
+transX: function(i) {
+	const trans = new THREE.Quaternion(0.05, 0, 0, 0);
+	const dq = DualQuaternion.setFromRotationTranslation(new THREE.Quaternion, trans);
+	DQ[selected].multiply(dq).normalize();
+
+	polyInter()
+	setCones();
+	setSamples();
+},
+
+transY: function(i) {
+	const trans = new THREE.Quaternion(0.0, 0.05, 0, 0);
+	const dq = DualQuaternion.setFromRotationTranslation(new THREE.Quaternion, trans);
+	DQ[selected].multiply(dq).normalize();
+
+	polyInter()
+	setCones();
+	setSamples();
+},
+
+transZ: function(i) {
+	const trans = new THREE.Quaternion(0.0, 0, 0.05, 0);
+	const dq = DualQuaternion.setFromRotationTranslation(new THREE.Quaternion, trans);
+	DQ[selected].multiply(dq).normalize();
+
+	polyInter()
+	setCones();
+	setSamples();
+},
+
+trans_X: function(i) {
+	const trans = new THREE.Quaternion(-0.05, 0, 0, 0);
+	const dq = DualQuaternion.setFromRotationTranslation(new THREE.Quaternion, trans);
+	DQ[selected].multiply(dq).normalize();
+
+	polyInter()
+	setCones();
+	setSamples();
+},
+
+trans_Y: function(i) {
+	const trans = new THREE.Quaternion(0.0, -0.05, 0, 0);
+	const dq = DualQuaternion.setFromRotationTranslation(new THREE.Quaternion, trans);
+	DQ[selected].multiply(dq).normalize();
+
+	polyInter()
+	setCones();
+	setSamples();
+},
+
+trans_Z: function(i) {
+	const trans = new THREE.Quaternion(0.0, 0, -0.05, 0);
+	const dq = DualQuaternion.setFromRotationTranslation(new THREE.Quaternion, trans);
+	DQ[selected].multiply(dq).normalize();
+
+	polyInter()
+	setCones();
+	setSamples();
+},
+}
+
+
+
 window.randTrans = function(i) {
 	T[i].y = Math.random()-0.5;
 	// R[i] = randomize(R[i]);
@@ -265,6 +392,42 @@ window.randTrans = function(i) {
 	setCones();
 	setSamples();
 }
+
+
+let raycaster = new THREE.Raycaster();
+let mouse = new THREE.Vector2();
+function onMouseDown(event) {
+    if(event.buttons == 2){
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+
+		raycaster.setFromCamera(mouse, camera);
+		let intersections = raycaster.intersectObject(conesDQ);
+        if(intersections.length){
+			selected = (intersections[0].instanceId)
+			console.log(selected)
+        }
+        
+    }
+}
+
+window.addEventListener('pointerdown', onMouseDown, false)
+
+const gui = new DAT.GUI();
+const transFolder = gui.addFolder("translation")
+transFolder.add(controls, 'transX').name("x")
+transFolder.add(controls, 'transY').name("y")
+transFolder.add(controls, 'transZ').name("z")
+transFolder.add(controls, 'trans_X').name("-x")
+transFolder.add(controls, 'trans_Y').name("-y")
+transFolder.add(controls, 'trans_Z').name("-z")
+const rotFolder = gui.addFolder("rotation")
+rotFolder.add(controls, 'rotX').name("x")
+rotFolder.add(controls, 'rotY').name("y")
+rotFolder.add(controls, 'rotZ').name("z")
+rotFolder.add(controls, 'rot_X').name("-x")
+rotFolder.add(controls, 'rot_Y').name("-y")
+rotFolder.add(controls, 'rot_Z').name("-z")
 
 window.setWeight = function(i, w) {
 	W[i] = w;
