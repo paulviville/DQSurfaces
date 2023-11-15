@@ -22,8 +22,8 @@ document.body.appendChild( renderer.domElement );
 
 let ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
 scene.add(ambientLight);
-let pointLight0 = new THREE.PointLight(0xffffff, 0.8);
-pointLight0.position.set(1,1,2);
+let pointLight0 = new THREE.PointLight(0xffffff, 1);
+pointLight0.position.set(0,1.5,2);
 scene.add(pointLight0);
 
 const orbit_controls = new OrbitControls(camera, renderer.domElement)
@@ -38,7 +38,7 @@ window.addEventListener('resize', function() {
 });
 
 
-const red = new THREE.MeshLambertMaterial({color: 0xff0000, wireframe: false});
+const red = new THREE.MeshBasicMaterial({color: 0xff0000, wireframe: false});
 const green = new THREE.MeshLambertMaterial({color: 0x00ff00, wireframe: true});
 const blue = new THREE.MeshLambertMaterial({color: 0x0000ff, wireframe: true});
 const yellow = new THREE.MeshLambertMaterial({color: 0xffff00, wireframe: true});
@@ -136,7 +136,7 @@ for(let i = 0; i < 4; ++i) {
 
 
 const samples = [];
-const nbSamples = 50;
+const nbSamples = 150;
 
 
 
@@ -209,9 +209,9 @@ polyInter()
 
 
 const surfaceGeometry = new THREE.PlaneGeometry(1, 1, nbSamples-1, nbSamples-1);
-const surfaceMaterial1 = new THREE.MeshLambertMaterial({color: 0xaaaaff, wireframe: false, side: THREE.DoubleSide});
+const surfaceMaterial1 = new THREE.MeshLambertMaterial({color: 0xbbbbff, wireframe: false, side: THREE.DoubleSide});
 const surfaceMaterial2 = new THREE.MeshLambertMaterial({color: 0x000000, wireframe: true, side: THREE.DoubleSide});
-const surfaceMesh = new THREE.Mesh(surfaceGeometry, surfaceMaterial2)
+const surfaceMesh = new THREE.Mesh(surfaceGeometry, surfaceMaterial1)
 scene.add(surfaceMesh)
 console.log(surfaceMesh)
 
@@ -259,6 +259,8 @@ function setSamples() {
 		surfaceMesh.geometry.vertices[s].copy(pos);
 	}
 	surfaceMesh.geometry.verticesNeedUpdate = true;
+	surfaceMesh.geometry.computeVertexNormals();
+	surfaceMesh.geometry.normalsNeedUpdate = true;
 }
 setSamples()
 
