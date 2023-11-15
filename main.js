@@ -8,21 +8,29 @@ import catmullClark from './CMapJS/Modeling/Subdivision/Surface/CatmullClark.js'
 import { cutAllEdges, quadrangulateAllFaces, quadrangulateFace } from './CMapJS/Utils/Subdivision.js';
 import { loadCMap2 } from './CMapJS/IO/SurfaceFormats/CMap2IO.js';
 import { cube_off, icosahedron_off } from './off_files.js';
+import * as DAT from './CMapJS/Libs/dat.gui.module.js';
 
+
+// console.log(new THREE.VertexNormalsHelper())
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xeeeeee);
 const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.001, 1000.0);
-camera.position.set(0, 0.5, 1.5);
+camera.position.set(0, 1.5, 2);
 const renderer = new THREE.WebGLRenderer({antialias: true});
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
 
-let ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-scene.add(ambientLight);
-let pointLight0 = new THREE.PointLight(0xffffff, 1);
-pointLight0.position.set(10,8,5);
+let ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
+// scene.add(ambientLight);
+let pointLight0 = new THREE.PointLight(0xffffff, 1.);
+pointLight0.position.set(0.5,2,0.8);
 scene.add(pointLight0);
+
+const light = new THREE.DirectionalLight( 0xFFFFFF, 2.0 );
+light.position.set( 0.1, 0.1, 0.3 );
+// scene.add(light);
+
 
 const orbit_controls = new OrbitControls(camera, renderer.domElement)
 
@@ -36,7 +44,7 @@ window.addEventListener('resize', function() {
 });
 
 
-const red = new THREE.MeshLambertMaterial({color: 0xff0000, wireframe: true});
+const red = new THREE.MeshBasicMaterial({color: 0xff0000, wireframe: false});
 const green = new THREE.MeshLambertMaterial({color: 0x00ff00, wireframe: true});
 const blue = new THREE.MeshLambertMaterial({color: 0x0000ff, wireframe: true});
 const yellow = new THREE.MeshLambertMaterial({color: 0xffff00, wireframe: true});
@@ -56,7 +64,7 @@ const worldZ = new THREE.Vector3(0, 0, 1);
 // const geometryOrigin = new THREE.SphereGeometry(0.01, 32, 32);
 const geometryOrigin = new THREE.SphereGeometry(0.01, 32, 32);
 const origin = new THREE.Mesh(geometryOrigin, white)
-scene.add(origin)
+// scene.add(origin)
 
 
 
@@ -132,7 +140,7 @@ for(let i = 0; i < 4; ++i) {
 
 
 const samples = [];
-const nbSamples = 100;
+const nbSamples = 200;
 
 function bezierPatch() {
 	const step = 1/ (nbSamples - 1);
@@ -303,6 +311,15 @@ WbezierPatch()
 
 
 
+const surfaceGeometry = new THREE.PlaneGeometry(1, 1, nbSamples-1, nbSamples-1);
+const surfaceMaterial1 = new THREE.MeshLambertMaterial({color: 0xbbbbff, wireframe: false, side: THREE.DoubleSide});
+const surfaceMaterial2 = new THREE.MeshLambertMaterial({color: 0x000000, wireframe: true, side: THREE.DoubleSide});
+const surfaceMesh = new THREE.Mesh(surfaceGeometry, surfaceMaterial1)
+scene.add(surfaceMesh)
+console.log(surfaceMesh)
+console.log(surfaceMaterial1)
+
+
 const geometryControlCone = new THREE.ConeGeometry(0.005, 0.025, 16, 1);
 geometryControlCone.translate(0, 0.0125, 0);
 const conesDQ = new THREE.InstancedMesh(geometryControlCone, red, 16);
@@ -323,7 +340,7 @@ const geometrySample = new THREE.BoxGeometry(0.012, 0.0003125, 0.012, 16, 1);
 // const geometryDisc = new THREE.ConeGeometry(0.005, 0.0025, 16, 1);
 
 const samplesDQ = new THREE.InstancedMesh(geometrySample, grey, nbSamples*nbSamples);
-scene.add(samplesDQ)
+// scene.add(samplesDQ)
 
 function setSamples() {
 	const scale = new THREE.Vector3(0.5, 0.5, 0.5);
@@ -334,8 +351,21 @@ function setSamples() {
 		
 	}
 	samplesDQ.instanceMatrix.needsUpdate = true
+
+	for(let s = 0; s < samples.length; ++s) {
+		const pos = samples[s].getTranslation();
+		surfaceMesh.geometry.vertices[s].copy(pos);
+	}
+	surfaceMesh.geometry.verticesNeedUpdate = true;
+	surfaceMesh.geometry.computeVertexNormals();
+	surfaceMesh.geometry.normalsNeedUpdate = true;
 }
 setSamples()
+
+window.addEventListener('pointerdown', onMouseDown, false)
+
+
+
 
 
 window.randRotate = function(i)  {
@@ -364,8 +394,194 @@ window.setWeight = function(i, w) {
 	setSamples();
 }
 
-const grid = new THREE.GridHelper(1, 10)
-scene.add(grid)
+
+
+let selected = 0;
+const controls = {
+weightInc: function() {
+	W[selected] += 0.2;
+	WbezierPatch()
+	setCones();
+	setSamples();
+} ,
+weightRed: function() {
+	W[selected] -= 0.2;
+	WbezierPatch()
+	setCones();
+	setSamples();
+} ,
+
+rotX: function() {
+	const rot = new THREE.Quaternion().setFromAxisAngle(worldX, 0.2);
+	const dq = DualQuaternion.setFromRotation(rot);
+	DQ[selected].multiply(dq).normalize();
+
+	WbezierPatch()
+	setCones();
+	setSamples();
+},
+
+rot_X: function(i) {
+	const rot = new THREE.Quaternion().setFromAxisAngle(worldX, -0.2);
+	const dq = DualQuaternion.setFromRotation(rot);
+	DQ[selected].multiply(dq).normalize();
+
+	WbezierPatch()
+	setCones();
+	setSamples();
+},
+
+rotY: function(i) {
+	const rot = new THREE.Quaternion().setFromAxisAngle(worldY, 0.2);
+	const dq = DualQuaternion.setFromRotation(rot);
+	DQ[selected].multiply(dq).normalize();
+
+	WbezierPatch()
+	setCones();
+	setSamples();
+},
+
+rot_Y: function(i) {
+	const rot = new THREE.Quaternion().setFromAxisAngle(worldY, -0.2);
+	const dq = DualQuaternion.setFromRotation(rot);
+	DQ[selected].multiply(dq).normalize();
+
+	WbezierPatch()
+	setCones();
+	setSamples();
+},
+
+rotZ: function(i) {
+	const rot = new THREE.Quaternion().setFromAxisAngle(worldZ, 0.2);
+	const dq = DualQuaternion.setFromRotation(rot);
+	DQ[selected].multiply(dq).normalize();
+
+	WbezierPatch()
+	setCones();
+	setSamples();
+},
+
+rot_Z: function(i) {
+	const rot = new THREE.Quaternion().setFromAxisAngle(worldZ, -0.5);
+	const dq = DualQuaternion.setFromRotation(rot);
+	DQ[selected].multiply(dq).normalize();
+
+	WbezierPatch()
+	setCones();
+	setSamples();
+},
+
+transX: function(i) {
+	const trans = new THREE.Quaternion(0.05, 0, 0, 0);
+	const dq = DualQuaternion.setFromRotationTranslation(new THREE.Quaternion, trans);
+	DQ[selected].multiply(dq).normalize();
+
+	WbezierPatch()
+	setCones();
+	setSamples();
+},
+
+transY: function(i) {
+	const trans = new THREE.Quaternion(0.0, 0.05, 0, 0);
+	const dq = DualQuaternion.setFromRotationTranslation(new THREE.Quaternion, trans);
+	DQ[selected].multiply(dq).normalize();
+
+	WbezierPatch()
+	setCones();
+	setSamples();
+},
+
+transZ: function(i) {
+	const trans = new THREE.Quaternion(0.0, 0, 0.05, 0);
+	const dq = DualQuaternion.setFromRotationTranslation(new THREE.Quaternion, trans);
+	DQ[selected].multiply(dq).normalize();
+
+	WbezierPatch()
+	setCones();
+	setSamples();
+},
+
+trans_X: function(i) {
+	const trans = new THREE.Quaternion(-0.05, 0, 0, 0);
+	const dq = DualQuaternion.setFromRotationTranslation(new THREE.Quaternion, trans);
+	DQ[selected].multiply(dq).normalize();
+
+	WbezierPatch()
+	setCones();
+	setSamples();
+},
+
+trans_Y: function(i) {
+	const trans = new THREE.Quaternion(0.0, -0.05, 0, 0);
+	const dq = DualQuaternion.setFromRotationTranslation(new THREE.Quaternion, trans);
+	DQ[selected].multiply(dq).normalize();
+
+	WbezierPatch()
+	setCones();
+	setSamples();
+},
+
+trans_Z: function(i) {
+	const trans = new THREE.Quaternion(0.0, 0, -0.05, 0);
+	const dq = DualQuaternion.setFromRotationTranslation(new THREE.Quaternion, trans);
+	DQ[selected].multiply(dq).normalize();
+
+	WbezierPatch()
+	setCones();
+	setSamples();
+},
+}
+
+
+
+window.randTrans = function(i) {
+	T[i].y = Math.random()-0.5;
+	// R[i] = randomize(R[i]);
+	DQ[i] = new DualQuaternion(R[i], T[i].clone().multiply(R[i]).multiplyScalar(0.5));
+
+	WbezierPatch()
+	setCones();
+	setSamples();
+}
+
+
+let raycaster = new THREE.Raycaster();
+let mouse = new THREE.Vector2();
+function onMouseDown(event) {
+    if(event.buttons == 2){
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+
+		raycaster.setFromCamera(mouse, camera);
+		let intersections = raycaster.intersectObject(conesDQ);
+        if(intersections.length){
+			selected = (intersections[0].instanceId)
+			console.log(selected)
+        }
+        
+    }
+}
+
+
+const gui = new DAT.GUI();
+const transFolder = gui.addFolder("translation")
+transFolder.add(controls, 'transX').name("x")
+transFolder.add(controls, 'transY').name("y")
+transFolder.add(controls, 'transZ').name("z")
+transFolder.add(controls, 'trans_X').name("-x")
+transFolder.add(controls, 'trans_Y').name("-y")
+transFolder.add(controls, 'trans_Z').name("-z")
+const rotFolder = gui.addFolder("rotation")
+rotFolder.add(controls, 'rotX').name("x")
+rotFolder.add(controls, 'rotY').name("y")
+rotFolder.add(controls, 'rotZ').name("z")
+rotFolder.add(controls, 'rot_X').name("-x")
+rotFolder.add(controls, 'rot_Y').name("-y")
+rotFolder.add(controls, 'rot_Z').name("-z")
+const weightFolder = gui.addFolder("weight")
+weightFolder.add(controls, 'weightInc').name("+")
+weightFolder.add(controls, 'weightRed').name("-")
+
 
 let frameCount = 0;
 function update (t)
@@ -385,3 +601,40 @@ function mainloop(t)
 }
 
 mainloop(0);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
