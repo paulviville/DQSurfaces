@@ -20,10 +20,10 @@ const renderer = new THREE.WebGLRenderer({antialias: true});
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
 
-let ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
+let ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
 scene.add(ambientLight);
-let pointLight0 = new THREE.PointLight(0xffffff, 1.5);
-pointLight0.position.set(10,8,5);
+let pointLight0 = new THREE.PointLight(0xffffff, 0.8);
+pointLight0.position.set(1,1,2);
 scene.add(pointLight0);
 
 const orbit_controls = new OrbitControls(camera, renderer.domElement)
@@ -38,7 +38,7 @@ window.addEventListener('resize', function() {
 });
 
 
-const red = new THREE.MeshLambertMaterial({color: 0xff0000, wireframe: true});
+const red = new THREE.MeshLambertMaterial({color: 0xff0000, wireframe: false});
 const green = new THREE.MeshLambertMaterial({color: 0x00ff00, wireframe: true});
 const blue = new THREE.MeshLambertMaterial({color: 0x0000ff, wireframe: true});
 const yellow = new THREE.MeshLambertMaterial({color: 0xffff00, wireframe: true});
@@ -58,7 +58,9 @@ const worldZ = new THREE.Vector3(0, 0, 1);
 // const geometryOrigin = new THREE.SphereGeometry(0.01, 32, 32);
 const geometryOrigin = new THREE.SphereGeometry(0.01, 32, 32);
 const origin = new THREE.Mesh(geometryOrigin, white)
-scene.add(origin)
+// scene.add(origin)
+
+
 
 
 
@@ -134,7 +136,7 @@ for(let i = 0; i < 4; ++i) {
 
 
 const samples = [];
-const nbSamples = 250;
+const nbSamples = 50;
 
 
 
@@ -206,6 +208,12 @@ polyInter()
 
 
 
+const surfaceGeometry = new THREE.PlaneGeometry(1, 1, nbSamples-1, nbSamples-1);
+const surfaceMaterial1 = new THREE.MeshLambertMaterial({color: 0xaaaaff, wireframe: false, side: THREE.DoubleSide});
+const surfaceMaterial2 = new THREE.MeshLambertMaterial({color: 0x000000, wireframe: true, side: THREE.DoubleSide});
+const surfaceMesh = new THREE.Mesh(surfaceGeometry, surfaceMaterial2)
+scene.add(surfaceMesh)
+console.log(surfaceMesh)
 
 
 
@@ -228,11 +236,11 @@ function setCones() {
 }
 setCones();
 
-const geometrySample = new THREE.BoxGeometry(0.012, 0.00003125, 0.012, 16, 1);
+const geometrySample = new THREE.BoxGeometry(0.002, 0.00003125, 0.012, 16, 1);
 // const geometrySample = new THREE.ConeGeometry(0.005, 0.025, 16, 1);
 
 const samplesDQ = new THREE.InstancedMesh(geometrySample, grey, nbSamples*nbSamples);
-scene.add(samplesDQ)
+// scene.add(samplesDQ)
 
 function setSamples() {
 	const scale = new THREE.Vector3(0.5, 0.5, 0.5);
@@ -245,6 +253,12 @@ function setSamples() {
 	}
 	samplesDQ.instanceMatrix.needsUpdate = true
 	samplesDQ.instanceColor.needsUpdate = true
+
+	for(let s = 0; s < samples.length; ++s) {
+		const pos = samples[s].getTranslation();
+		surfaceMesh.geometry.vertices[s].copy(pos);
+	}
+	surfaceMesh.geometry.verticesNeedUpdate = true;
 }
 setSamples()
 
@@ -437,7 +451,8 @@ window.setWeight = function(i, w) {
 }
 
 const grid = new THREE.GridHelper(1, 10)
-scene.add(grid)
+console.log(grid)
+// scene.add(grid)
 
 let frameCount = 0;
 function update (t)
