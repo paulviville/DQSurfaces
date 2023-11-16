@@ -5,15 +5,16 @@ import {DualQuaternion} from './DualQuaternion.js';
 
 import CMap2 from './CMapJS/CMap/CMap2.js';
 import catmullClark from './CMapJS/Modeling/Subdivision/Surface/CatmullClark.js';
+import {catmullClark_inter} from './CMapJS/Modeling/Subdivision/Surface/CatmullClark.js';
 import { cutAllEdges, quadrangulateAllFaces, quadrangulateFace } from './CMapJS/Utils/Subdivision.js';
 import { loadCMap2 } from './CMapJS/IO/SurfaceFormats/CMap2IO.js';
-import { cube_off, icosahedron_off } from './off_files.js';
+import { cube_off, icosahedron_off, octahedron_off, dodecahedron_off, grid2x2_off } from './off_files.js';
 
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xeeeeee);
+scene.background = new THREE.Color(0xffffff);
 const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.001, 1000.0);
-camera.position.set(0, 0.5, 1.5);
+camera.position.set(0.35, 0.5, 1.1);
 const renderer = new THREE.WebGLRenderer({antialias: true});
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
@@ -36,9 +37,10 @@ window.addEventListener('resize', function() {
 });
 
 
-const red = new THREE.MeshLambertMaterial({color: 0xff0000, wireframe: true});
+const red = new THREE.MeshLambertMaterial({color: 0xff0000, wireframe: false});
+const red2 = new THREE.MeshLambertMaterial({color: 0x900000, wireframe: false});
 const green = new THREE.MeshLambertMaterial({color: 0x00ff00, wireframe: true});
-const blue = new THREE.MeshLambertMaterial({color: 0x0000ff, wireframe: true});
+const blue = new THREE.MeshLambertMaterial({color: 0x4444AA, wireframe: false});
 const yellow = new THREE.MeshLambertMaterial({color: 0xffff00, wireframe: true});
 const cyan = new THREE.MeshLambertMaterial({color: 0x00FFFF, wireframe: true});
 const magenta = new THREE.MeshLambertMaterial({color: 0xFF00FF, wireframe: true});
@@ -53,9 +55,9 @@ const worldY = new THREE.Vector3(0, 1, 0);
 const worldZ = new THREE.Vector3(0, 0, 1);
 
 // const geometryOrigin = new THREE.SphereGeometry(0.01, 32, 32);
-const geometryOrigin = new THREE.SphereGeometry(0.43301, 32, 32);
+const geometryOrigin = new THREE.SphereGeometry(0.4, 32, 32);
 const origin = new THREE.Mesh(geometryOrigin, white)
-scene.add(origin)
+// scene.add(origin)
 
 
 
@@ -78,24 +80,24 @@ const r5 = new THREE.Quaternion().setFromUnitVectors(worldY, new THREE.Vector3(t
 const r6 = new THREE.Quaternion().setFromUnitVectors(worldY, new THREE.Vector3(t6.x, t6.y, t6.z).normalize());
 const r7 = new THREE.Quaternion().setFromUnitVectors(worldY, new THREE.Vector3(t7.x, t7.y, t7.z).normalize());
 
-function randomize(quat) {
-	const u1 = Math.random();
-	const sqrt1u1 = Math.sqrt( 1 - u1 );
-	const sqrtu1 = Math.sqrt( u1 );
+// function randomize(quat) {
+// 	const u1 = Math.random();
+// 	const sqrt1u1 = Math.sqrt( 1 - u1 );
+// 	const sqrtu1 = Math.sqrt( u1 );
 
-	const u2 = 2 * Math.PI * Math.random();
+// 	const u2 = 2 * Math.PI * Math.random();
 
-	const u3 = 2 * Math.PI * Math.random();
+// 	const u3 = 2 * Math.PI * Math.random();
 
-	return quat.set(
-		sqrt1u1 * Math.cos( u2 ),
-		sqrtu1 * Math.sin( u3 ),
-		sqrtu1 * Math.cos( u3 ),
-		sqrt1u1 * Math.sin( u2 ),
-	);
+// 	return quat.set(
+// 		sqrt1u1 * Math.cos( u2 ),
+// 		sqrtu1 * Math.sin( u3 ),
+// 		sqrtu1 * Math.cos( u3 ),
+// 		sqrt1u1 * Math.sin( u2 ),
+// 	);
 	
-	return quadrangulateFace
-}
+// 	return quadrangulateFace
+// }
 
 // const r0 = randomize(new THREE.Quaternion())
 // const r1 = randomize(new THREE.Quaternion())
@@ -149,11 +151,12 @@ const dq7 = new DualQuaternion(r7, t7.clone().multiply(r7).multiplyScalar(0.5));
 // d = map.phi1[d];  vid = map.cell(map.vertex, d);
 // pos[vid] = new THREE.Vector3(t7.x, t7.y, t7.z);
 
-const map = loadCMap2("off", icosahedron_off);
+const map = loadCMap2("off", dodecahedron_off);
+const pos = map.getAttribute(map.vertex, "position");
 
 let d;
 
-const mapDQ = loadCMap2("off", icosahedron_off);
+const mapDQ = loadCMap2("off", dodecahedron_off);
 mapDQ.setEmbeddings(mapDQ.edge);
 mapDQ.setEmbeddings(mapDQ.face);
 const DQpos = mapDQ.getAttribute(mapDQ.vertex, "position");
@@ -162,12 +165,20 @@ const DQs = mapDQ.addAttribute(mapDQ.vertex, "dq");
 
 mapDQ.foreach(mapDQ.vertex, vd => {
 	const vid = mapDQ.cell(mapDQ.vertex, vd);
-	const t = DQpos[vid].clone();
+	const t = DQpos[vid].clone().multiplyScalar(0.5);
+	pos[vid].multiplyScalar(0.5);
 	const trans = new THREE.Quaternion(t.x, t.y, t.z);
 	const unitT = trans.clone().normalize();
-	const rot = new THREE.Quaternion().setFromUnitVectors(worldY, new THREE.Vector3(trans.x, trans.y, trans.z).normalize());
+	// const rot = new THREE.Quaternion().setFromUnitVectors(worldY, new THREE.Vector3(trans.x, trans.y, trans.z).normalize());
+	let rot = new THREE.Quaternion()
 
-	DQs[vid] = new DualQuaternion(rot, trans.clone().multiply(rot).multiplyScalar(0.5));
+	if(vid == 3 || vid == 9 || vid == 15) {
+		rot = new THREE.Quaternion().setFromUnitVectors(worldY, new THREE.Vector3(trans.x, trans.y, trans.z).normalize());
+		DQs[vid] = new DualQuaternion(rot, trans.clone().multiply(rot).multiplyScalar(0.5));
+
+	}
+	else
+		DQs[vid] = new DualQuaternion(rot, trans.clone().multiplyScalar(0.5));
 
 
 });
@@ -232,7 +243,7 @@ geometrySampleCone.translate(0, 0.0125, 0);
 
 function verticesDQ() {
 	const vertex = mapDQ.vertex;
-	const scale = new THREE.Vector3(2, 2, 2);
+	const scale = new THREE.Vector3(1, 1, 1);
 	const conesVertices = new THREE.InstancedMesh(geometrySampleCone, red, mapDQ.nbCells(vertex));
 	scene.add(conesVertices);
 
@@ -240,7 +251,7 @@ function verticesDQ() {
 	const matrix = new THREE.Matrix4
 	mapDQ.foreach(vertex, vd => {
 		vid = mapDQ.cell(vertex, vd);
-		dq = DQs[vid];
+		dq = DQs[vid].clone();
 
 		matrix.compose(dq.getTranslation(), dq.getRotation(), scale);
 		conesVertices.setMatrixAt(vid, matrix);
@@ -254,9 +265,9 @@ function edgesDQ() {
 
 	const nbEdges = mapDQ.nbCells(edge);
 
-	const nbDivs = 20;
-	const scale = new THREE.Vector3(1, 1, 1);
-	const conesEdges = new THREE.InstancedMesh(geometrySampleCone, black, (nbDivs+1) * nbEdges);
+	const nbDivs = 10;
+	const scale = new THREE.Vector3(0.5, 0.5, 0.5);
+	const conesEdges = new THREE.InstancedMesh(geometrySampleCone, red2, (nbDivs+1) * nbEdges);
 	scene.add(conesEdges);
 
 	let eid, dq0, dq1;
@@ -264,11 +275,11 @@ function edgesDQ() {
 	const dq = new DualQuaternion;
 	mapDQ.foreach(edge, ed => {
 		eid = mapDQ.cell(edge, ed);
-		dq0 = DQs[mapDQ.cell(vertex, ed)];
-		dq1 = DQs[mapDQ.cell(vertex, mapDQ.phi2[ed])];
+		dq0 = DQs[mapDQ.cell(vertex, ed)].clone();
+		dq1 = DQs[mapDQ.cell(vertex, mapDQ.phi2[ed])].clone();
 
 		for(let i = 0; i < nbDivs + 1; ++i) {
-			dq.slerpDualQuaternions(dq0, dq1, i / nbDivs).normalize()
+			dq.slerpDualQuaternions(dq0, dq1, i / nbDivs)
 			matrix.compose(dq.getTranslation(), dq.getRotation(), scale);
 			conesEdges.setMatrixAt(eid * (nbDivs+1) + i, matrix);
 
@@ -373,6 +384,7 @@ function catmullClarkDQ() {
 			mapDQ.foreachDartOf(vertex, vd, d => {
 				DQs[vid].add(DQs[mapDQ.cell(vertex, mapDQ.phi([1, 1], d))]);
 				++nbFaces;
+				// return true
 			});
 			DQs[vid].multiplyScalar(1 / nbFaces).normalize();
 		}
@@ -407,14 +419,18 @@ function catmullClarkDQ() {
 		F.multiplyScalar(1/n);
 		E.multiplyScalar(2/n);
 		P.multiplyScalar(n - 3);
-		P.add(F).add(E).multiplyScalar(1/n).normalize();
+		P.add(F).add(E).multiplyScalar(1/n);
 
 	}, {cache: initVerticesCache});
 
 
 
 	mapDQ.foreach(vertex, vd => {
-		
+		const vid = mapDQ.cell(mapDQ.vertex, vd);
+		const dq = DQs[vid];
+		const pos = dq.transform(new THREE.Vector3());
+
+		DQpos[vid] = pos;
 	});
 
 	mapDQ.removeAttribute(vertex, DQs2);
@@ -625,21 +641,42 @@ function CCDelta(approx = true) {
 // catmullClarkDQ()
 // catmullClarkDQ()
 // catmullClarkDQ()
-// catmullClarkDQ()
 
 // console.log(mapDQ.nbCells(mapDQ.face))
+// CCDelta(true);
+// CCDelta(true);
 // CCDelta(false);
-CCDelta(false);
 // CCDeltaApprox(mapDQ);
 
+catmullClarkDQ()
+catmullClarkDQ()
+catmullClarkDQ()
+catmullClarkDQ()
+catmullClarkDQ()
+catmullClarkDQ()
+// catmullClarkDQ()
+// catmullClarkDQ()
+// catmullClarkDQ()
+// catmullClarkDQ()
+// catmullClark_inter(map)
 catmullClark(map)
+catmullClark(map)
+// catmullClark(map)
 
-verticesDQ()
-edgesDQ()
+// catmullClarkDQ()
+// catmullClark_inter(map)
+// catmullClark_inter(map)
+// catmullClark_inter(map)
+
+// verticesDQ()
+// edgesDQ()
 // facesDQ();
 
 
-
+// mapDQ.foreach(mapDQ.face, fd => {
+// 	console.log(mapDQ.cell(mapDQ.face, fd), 
+// 	mapDQ.isBoundary(fd));
+// })
 
 
 
@@ -647,22 +684,25 @@ edgesDQ()
 const mapRenderer = new Renderer(map);
 mapRenderer.vertices.create()
 // mapRenderer.vertices.addTo(scene)
-mapRenderer.edges.create()
-mapRenderer.edges.addTo(scene)
+// mapRenderer.edges.create({color: 0x2020A0})
+// mapRenderer.edges.addTo(scene)
+// mapRenderer.faces.create({color: new THREE.Color(0x2020A0), transparent: true, opacity: 0.5})
+// mapRenderer.faces.addTo(scene)
 
 
-// const mapDQRenderer = new Renderer(mapDQ);
+const mapDQRenderer = new Renderer(mapDQ);
 // mapDQRenderer.vertices.create()
 // mapDQRenderer.vertices.addTo(scene)
 // mapDQRenderer.edges.create()
 // mapDQRenderer.edges.addTo(scene)
-
+mapDQRenderer.faces.create({color: new THREE.Color(0x2020ff), transparent: false, opacity: 0.5})
+mapDQRenderer.faces.addTo(scene)
 
 
 
 
 const grid = new THREE.GridHelper(1, 10)
-scene.add(grid)
+// scene.add(grid)
 
 let frameCount = 0;
 function update (t)

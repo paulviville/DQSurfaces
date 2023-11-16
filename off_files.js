@@ -106,7 +106,7 @@ export const octahedron_off =
 3 1 2 5\n\
 ";
 
-let dodecahedron_off = 
+export const dodecahedron_off = 
 `OFF
 
 20 12 0
@@ -164,19 +164,19 @@ OFF
 4 7 6 5 4
 `
 
-let grid2x2_off = `
+export let grid2x2_off = `
 OFF
 
 9 4 0
--0.5 0.5 0
-0 0.5 0
-0.5 0.5 0
+-0.5 0 0.5
+0 0 0.5
+0.5 0 0.5
 -0.5 0 0
-0 0 0.05
+0 0 0.0
 0.5 0 0
--0.5 -0.5 0
-0 -0.5 0
-0.5 -0.5 0
+-0.5 0 -0.5
+0 0 -0.5 
+0.5 0 -0.5 
 4 0 3 4 1
 4 1 4 5 2
 4 3 6 7 4
