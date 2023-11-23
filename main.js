@@ -19,7 +19,7 @@ const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerH
 // camera.position.set(0.35, 0.5, 1.1);
 // camera.position.set(0.52, 0.37, 1.1);
 camera.position.set(0.15, 0.27, 1.22);
-camera.position.set(0.11, 0.57, 1.22);
+camera.position.set(0.11, 0.57, 1.3);
 const renderer = new THREE.WebGLRenderer({antialias: true});
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
@@ -46,7 +46,7 @@ window.camPos = function() {
 	console.log(camera.position)
 }
 
-const red = new THREE.MeshLambertMaterial({color: 0xff0000, wireframe: false});
+const red = new THREE.MeshLambertMaterial({color: 0xff0000, wireframe: true});
 const red2 = new THREE.MeshLambertMaterial({color: 0x900000, wireframe: false});
 const green = new THREE.MeshLambertMaterial({color: 0x00ff00, wireframe: true});
 const blue = new THREE.MeshLambertMaterial({color: 0x4444AA, wireframe: false});
@@ -91,20 +91,22 @@ mapDQ.foreach(mapDQ.vertex, vd => {
 	// const rot = new THREE.Quaternion().setFromUnitVectors(worldY, new THREE.Vector3(trans.x, trans.y, trans.z).normalize());
 	let rot = new THREE.Quaternion()
 
-	// // if(vid == 0) {
-	// if(vid == 0 || vid == 1 || vid == 5) {
+	if(vid == 2) {
+	// if(vid == 0 || vid == 1 || vid == 2) {
 
 	// 	rot = new THREE.Quaternion().setFromUnitVectors(worldY, new THREE.Vector3(trans.x, trans.y, trans.z).normalize());
 	// 	if(vid == 0) 
-	// 		rot = new THREE.Quaternion().setFromAxisAngle(worldY, 2.2*Math.PI / 2)
-	// 	if(vid == 5) 
+		rot = new THREE.Quaternion().setFromAxisAngle(worldY, 0.0*Math.PI / 2)
+			rot.multiply(new THREE.Quaternion().setFromAxisAngle(worldY, 7*Math.PI / 2))
+			rot.multiply(new THREE.Quaternion().setFromAxisAngle(worldX, 7*Math.PI / 2))
+		// 	if(vid == 5) 
 	// 		rot.multiply(new THREE.Quaternion().setFromAxisAngle(worldZ, 5*Math.PI / 2))
 	// 	if(vid == 1) 
 	// 		rot.multiply(new THREE.Quaternion().setFromAxisAngle(worldY, 6.5*Math.PI / 2))
-	// 	DQs[vid] = new DualQuaternion(rot, trans.clone().multiply(rot).multiplyScalar(0.5));
+		DQs[vid] = new DualQuaternion(rot, trans.clone().multiply(rot).multiplyScalar(0.5));
 
-	// }
-	// else
+	}
+	else
 		DQs[vid] = new DualQuaternion(rot, trans.clone().multiplyScalar(0.5));
 
 
@@ -122,7 +124,7 @@ geometrySampleCone.translate(0, 0.0125, 0);
 
 function verticesDQ() {
 	const vertex = mapDQ.vertex;
-	const scale = new THREE.Vector3(1.5, 1.5, 1.5);
+	const scale = new THREE.Vector3(3.5, 3.5, 3.5);
 	const conesVertices = new THREE.InstancedMesh(geometrySampleCone, red, mapDQ.nbCells(vertex));
 	scene.add(conesVertices);
 
@@ -131,7 +133,8 @@ function verticesDQ() {
 	mapDQ.foreach(vertex, vd => {
 		vid = mapDQ.cell(vertex, vd);
 		dq = DQs[vid].clone();
-		if(vid == 0 || vid == 1 || vid == 5)
+		if( vid == 2)
+		// if(vid == 0|| vid == 1 || vid == 2)
 			matrix.compose(dq.getTranslation(), dq.getRotation(), scale);
 		else
 			matrix.compose(dq.getTranslation(), dq.getRotation(), new THREE.Vector3(0, 0, 0));
@@ -284,10 +287,17 @@ verticesDQ()
 // facesDQ();
 
 
-butterfly(map)
-butterfly(map)
-butterfly(map) 
+// butterfly(map)
+// butterfly(map)
+// butterfly(map) 
 butterflyDQ()
+butterflyDQ()
+butterflyDQ()
+butterflyDQ()
+butterflyDQ()
+butterflyDQ()
+// butterflyDQ()
+// butterflyDQ()
 
 
 
@@ -297,7 +307,7 @@ const mapRenderer = new Renderer(map);
 // mapRenderer.edges.create({color: 0x2020A0, size: 0.1})
 // mapRenderer.edges.addTo(scene)
 mapRenderer.faces.create({color: new THREE.Color(0xff5555), wireframe:false, transparent: true, opacity: 0.5})
-mapRenderer.faces.addTo(scene)
+// mapRenderer.faces.addTo(scene)
 
 
 const mapDQRenderer = new Renderer(mapDQ);
