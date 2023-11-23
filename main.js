@@ -67,111 +67,18 @@ const origin = new THREE.Mesh(geometryOrigin, white)
 // scene.add(origin)
 
 
-
-const t0 = new THREE.Quaternion(0.25, 0.25, -0.25, 0)
-const t1 = new THREE.Quaternion(0.25, -0.25, -0.25, 0)
-const t2 = new THREE.Quaternion(-0.25, -0.25, -0.25, 0)
-const t3 = new THREE.Quaternion(-0.25, 0.25, -0.25, 0)
-const t4 = new THREE.Quaternion(0.25, 0.25, 0.25, 0)
-const t5 = new THREE.Quaternion(-0.25, 0.25, 0.25, 0)
-const t6 = new THREE.Quaternion(-0.25, -0.25, 0.25, 0)
-const t7 = new THREE.Quaternion(0.25, -0.25, 0.25, 0)
-
-// const r0 = new THREE.Quaternion().setFromAxisAngle(worldX, Math.PI / 4)
-const r0 = new THREE.Quaternion().setFromUnitVectors(worldY, new THREE.Vector3(t0.x, t0.y, t0.z).normalize());
-const r1 = new THREE.Quaternion().setFromUnitVectors(worldY, new THREE.Vector3(t1.x, t1.y, t1.z).normalize());
-const r2 = new THREE.Quaternion().setFromUnitVectors(worldY, new THREE.Vector3(t2.x, t2.y, t2.z).normalize());
-const r3 = new THREE.Quaternion().setFromUnitVectors(worldY, new THREE.Vector3(t3.x, t3.y, t3.z).normalize());
-const r4 = new THREE.Quaternion().setFromUnitVectors(worldY, new THREE.Vector3(t4.x, t4.y, t4.z).normalize());
-const r5 = new THREE.Quaternion().setFromUnitVectors(worldY, new THREE.Vector3(t5.x, t5.y, t5.z).normalize());
-const r6 = new THREE.Quaternion().setFromUnitVectors(worldY, new THREE.Vector3(t6.x, t6.y, t6.z).normalize());
-const r7 = new THREE.Quaternion().setFromUnitVectors(worldY, new THREE.Vector3(t7.x, t7.y, t7.z).normalize());
-
-// function randomize(quat) {
-// 	const u1 = Math.random();
-// 	const sqrt1u1 = Math.sqrt( 1 - u1 );
-// 	const sqrtu1 = Math.sqrt( u1 );
-
-// 	const u2 = 2 * Math.PI * Math.random();
-
-// 	const u3 = 2 * Math.PI * Math.random();
-
-// 	return quat.set(
-// 		sqrt1u1 * Math.cos( u2 ),
-// 		sqrtu1 * Math.sin( u3 ),
-// 		sqrtu1 * Math.cos( u3 ),
-// 		sqrt1u1 * Math.sin( u2 ),
-// 	);
-	
-// 	return quadrangulateFace
-// }
-
-// const r0 = randomize(new THREE.Quaternion())
-// const r1 = randomize(new THREE.Quaternion())
-// const r2 = randomize(new THREE.Quaternion())
-// const r3 = randomize(new THREE.Quaternion())
-// const r4 = randomize(new THREE.Quaternion())
-// const r5 = randomize(new THREE.Quaternion())
-// const r6 = randomize(new THREE.Quaternion())
-// const r7 = randomize(new THREE.Quaternion())
-
-
-const dq0 = new DualQuaternion(r0, t0.clone().multiply(r0).multiplyScalar(0.5));
-const dq1 = new DualQuaternion(r1, t1.clone().multiply(r1).multiplyScalar(0.5));
-const dq2 = new DualQuaternion(r2, t2.clone().multiply(r2).multiplyScalar(0.5));
-const dq3 = new DualQuaternion(r3, t3.clone().multiply(r3).multiplyScalar(0.5));
-const dq4 = new DualQuaternion(r4, t4.clone().multiply(r4).multiplyScalar(0.5));
-const dq5 = new DualQuaternion(r5, t5.clone().multiply(r5).multiplyScalar(0.5));
-const dq6 = new DualQuaternion(r6, t6.clone().multiply(r6).multiplyScalar(0.5));
-const dq7 = new DualQuaternion(r7, t7.clone().multiply(r7).multiplyScalar(0.5));
-
-
-// const dq0 = new DualQuaternion(r0, t0.clone().multiply(r0).multiplyScalar(0.5));
-// const dq1 = new DualQuaternion(r0, t1.clone().multiply(r0).multiplyScalar(0.5));
-// const dq2 = new DualQuaternion(r3, t2.clone().multiply(r3).multiplyScalar(0.5));
-// const dq3 = new DualQuaternion(r3, t3.clone().multiply(r3).multiplyScalar(0.5));
-// const dq4 = new DualQuaternion(r4, t4.clone().multiply(r4).multiplyScalar(0.5));
-// const dq5 = new DualQuaternion(r5, t5.clone().multiply(r5).multiplyScalar(0.5));
-// const dq6 = new DualQuaternion(r5, t6.clone().multiply(r5).multiplyScalar(0.5));
-// const dq7 = new DualQuaternion(r4, t7.clone().multiply(r4).multiplyScalar(0.5));
-
-
-// const map = new CMap2();
-// let d = map.addPrism(4);
-// map.setEmbeddings(map.vertex);
-// const pos = map.addAttribute(map.vertex, "position");
-
-// let vid = map.cell(map.vertex, d);
-// pos[vid] = new THREE.Vector3(t0.x, t0.y, t0.z);
-// d = map.phi1[d]; vid = map.cell(map.vertex, d);
-// pos[vid] = new THREE.Vector3(t1.x, t1.y, t1.z);
-// d = map.phi1[d];  vid = map.cell(map.vertex, d);
-// pos[vid] = new THREE.Vector3(t2.x, t2.y, t2.z);
-// d = map.phi1[d];  vid = map.cell(map.vertex, d);
-// pos[vid] = new THREE.Vector3(t3.x, t3.y, t3.z);
-// d = map.phi([2, 1, 1, 2], d);  vid = map.cell(map.vertex, d);
-// pos[vid] = new THREE.Vector3(t4.x, t4.y, t4.z);
-// d = map.phi1[d];  vid = map.cell(map.vertex, d);
-// pos[vid] = new THREE.Vector3(t5.x, t5.y, t5.z);
-// d = map.phi1[d];  vid = map.cell(map.vertex, d);
-// pos[vid] = new THREE.Vector3(t6.x, t6.y, t6.z);
-// d = map.phi1[d];  vid = map.cell(map.vertex, d);
-// pos[vid] = new THREE.Vector3(t7.x, t7.y, t7.z);
-
-let map = loadCMap2("off", dodecahedron_off);
-let pos = map.getAttribute(map.vertex, "position");
+const map = loadCMap2("off", dodecahedron_off);
+const pos = map.getAttribute(map.vertex, "position");
 
 let d;
 
-let mapDQ = loadCMap2("off", dodecahedron_off);
+const mapDQ = loadCMap2("off", dodecahedron_off);
 mapDQ.setEmbeddings(mapDQ.edge);
 mapDQ.setEmbeddings(mapDQ.face);
-let DQpos = mapDQ.getAttribute(mapDQ.vertex, "position");
-let DQs = mapDQ.addAttribute(mapDQ.vertex, "dq");
+const DQpos = mapDQ.getAttribute(mapDQ.vertex, "position");
+const DQs = mapDQ.addAttribute(mapDQ.vertex, "dq");
 
 
-// const DQcontrols = []
-// let rotControls = 
 mapDQ.foreach(mapDQ.vertex, vd => {
 	const vid = mapDQ.cell(mapDQ.vertex, vd);
 	DQpos[vid].multiplyScalar(0.5);
@@ -182,38 +89,24 @@ mapDQ.foreach(mapDQ.vertex, vd => {
 	// const rot = new THREE.Quaternion().setFromUnitVectors(worldY, new THREE.Vector3(trans.x, trans.y, trans.z).normalize());
 	let rot = new THREE.Quaternion()
 
-		if(vid == 0 || vid == 1 || vid == 5) {
+	// if(vid == 0) {
+	if(vid == 0 || vid == 1 || vid == 5) {
 
 		rot = new THREE.Quaternion().setFromUnitVectors(worldY, new THREE.Vector3(trans.x, trans.y, trans.z).normalize());
 		if(vid == 0) 
-			rot = new THREE.Quaternion().setFromAxisAngle(worldY, 0.15*Math.PI / 2)
-			// .multiply(new THREE.Quaternion().setFromAxisAngle(worldZ, 1.5*Math.PI / 2))
+			rot = new THREE.Quaternion().setFromAxisAngle(worldY, 2.2*Math.PI / 2)
 		if(vid == 5) 
-			rot.multiply(new THREE.Quaternion().setFromAxisAngle(worldZ, 1*Math.PI / 2))
-
+			rot.multiply(new THREE.Quaternion().setFromAxisAngle(worldZ, 5*Math.PI / 2))
 		if(vid == 1) 
-			rot.multiply(new THREE.Quaternion().setFromAxisAngle(worldZ, 1.5*Math.PI / 2)).
-			multiply(new THREE.Quaternion().setFromAxisAngle(worldY, 3*Math.PI / 2))
+			rot.multiply(new THREE.Quaternion().setFromAxisAngle(worldY, 6.5*Math.PI / 2))
 		DQs[vid] = new DualQuaternion(rot, trans.clone().multiply(rot).multiplyScalar(0.5));
 
 	}
 	else
-		// DQs[vid] = new DualQuaternion(rot, trans.clone().multiply(rot).multiplyScalar(0.5));
 		DQs[vid] = new DualQuaternion(rot, trans.clone().multiplyScalar(0.5));
 
 
 });
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -227,7 +120,7 @@ geometrySampleCone.translate(0, 0.0125, 0);
 
 function verticesDQ() {
 	const vertex = mapDQ.vertex;
-	const scale = new THREE.Vector3(3, 3, 3);
+	const scale = new THREE.Vector3(1.5, 1.5, 1.5);
 	const conesVertices = new THREE.InstancedMesh(geometrySampleCone, red, mapDQ.nbCells(vertex));
 	scene.add(conesVertices);
 
@@ -254,7 +147,7 @@ function edgesDQ() {
 	const nbEdges = mapDQ.nbCells(edge);
 
 	const nbDivs = 10;
-	const scale = new THREE.Vector3(1.25, 1.25, 1.25);
+	const scale = new THREE.Vector3(0.5, 0.5, 0.5);
 	const conesEdges = new THREE.InstancedMesh(geometrySampleCone, red2, (nbDivs+1) * nbEdges);
 	scene.add(conesEdges);
 
@@ -423,6 +316,125 @@ function catmullClarkDQ() {
 
 	mapDQ.removeAttribute(vertex, DQs2);
 }
+
+
+
+// function CCDelta(approx = true) {
+// 	const vertex = mapDQ.vertex;
+// 	const edge = mapDQ.edge;
+// 	const face = mapDQ.face;
+
+// 	const DQs2 = mapDQ.addAttribute(vertex, "dq2");
+// 	const delta = mapDQ.addAttribute(vertex, "delta");
+// 	// const centers = mapDQ.addAttribute(face, "centers");
+
+// 	// let eid;
+// 	// mapDQ.foreach(edge, ed => {
+// 	// 	eid = mapDQ.cell(edge, ed);
+// 	// 	mids = new DualQuaternion;
+// 	// });
+
+// 	// let fid;
+// 	// mapDQ.foreach(face, fd => {
+// 	// 	fid = mapDQ.cell(face, ed);
+// 	// 	centers[fid] = new DualQuaternion(new THREE.Quaternion(0, 0, 0, 0), new THREE.Quaternion(0, 0, 0, 0));
+// 	// 	mapDQ.foreachDartOf()
+// 	// });
+
+// 	const initVerticesCache = mapDQ.cache(vertex);
+// 	const faceVerticesCache = [];
+// 	const edgeVerticesCache = [];
+
+
+
+// 	quadrangulateAllFaces(mapDQ,
+// 		vd => {
+// 			edgeVerticesCache.push(vd);
+
+// 			const vid = mapDQ.cell(vertex, vd);
+// 			DQs[vid] = new DualQuaternion(new THREE.Quaternion(0, 0, 0, 0), new THREE.Quaternion(0, 0, 0, 0));
+// 			DQs[vid] = new DualQuaternion(new THREE.Quaternion(0, 0, 0, 0), new THREE.Quaternion(0, 0, 0, 0));
+// 			mapDQ.foreachDartOf(vertex, vd, d => {
+// 				DQs[vid].add(DQs[mapDQ.cell(vertex, mapDQ.phi2[d])])
+// 			});
+// 			DQs[vid].multiplyScalar(0.5).normalize();
+// 		},
+// 		vd => {
+// 			faceVerticesCache.push(vd);
+
+// 			const vid = mapDQ.cell(vertex, vd);
+// 			let nbFaces = 0;
+// 			DQs[vid] = new DualQuaternion(new THREE.Quaternion(0, 0, 0, 0), new THREE.Quaternion(0, 0, 0, 0));
+// 			mapDQ.foreachDartOf(vertex, vd, d => {
+// 				DQs[vid].add(DQs[mapDQ.cell(vertex, mapDQ.phi([1, 1], d))]);
+// 				++nbFaces;
+// 			});
+// 			DQs[vid].multiplyScalar(1 / nbFaces).normalize();
+// 		}
+// 	);
+
+// 	mapDQ.foreach(vertex, vd => {
+// 		const vid = mapDQ.cell(vertex, vd);
+// 		DQs2[vid] = DQs[vid];
+// 		DQs[vid] = new DualQuaternion(new THREE.Quaternion(0, 0, 0, 0), new THREE.Quaternion(0, 0, 0, 0));
+
+// 		mapDQ.foreachDartOf(vertex, vd, d => {
+// 			DQs[vid].add(DQs[mapDQ.cell(vertex, mapDQ.phi1[d])]);
+// 		});
+
+// 		DQs[vid].multiplyScalar(0.25).normalize()
+
+// 	}, {cache: edgeVerticesCache});
+
+// 	mapDQ.foreach(vertex, vd => {
+// 		const vid = mapDQ.cell(vertex, vd);
+
+// 		let n = 0;
+// 		const F = new DualQuaternion(new THREE.Quaternion(0, 0, 0, 0), new THREE.Quaternion(0, 0, 0, 0));
+// 		const E = new DualQuaternion(new THREE.Quaternion(0, 0, 0, 0), new THREE.Quaternion(0, 0, 0, 0));
+// 		const P = DQs[vid].clone();
+// 		mapDQ.foreachDartOf(vertex, vd, d => {
+// 			F.add(DQs[mapDQ.cell(vertex, mapDQ.phi([1, 1, 2], d))]);
+// 			E.add(DQs[mapDQ.cell(vertex, mapDQ.phi1[d])]);
+// 			++n;
+// 		});
+
+// 		F.multiplyScalar(1/n);
+// 		E.multiplyScalar(2/n);
+// 		P.multiplyScalar(n - 3);
+// 		P.add(F).add(E).multiplyScalar(1/n).normalize();
+
+// 		DQs2[vid] = P;
+// 		delta[vid] = DQs2[vid].clone().multiply(DQs[vid].clone().invert())
+
+// 	}, {cache: initVerticesCache});
+
+
+// 	if(approx)
+// 		mapDQ.foreach(vertex, vd => {
+// 			const vid = mapDQ.cell(vertex, vd);
+// 			DQs[vid].copy(DQs2[vid])
+// 		}, {cache: initVerticesCache});
+// 	else {
+// 		let path = [1, 2];
+// 		mapDQ.foreach(vertex, vd => {
+// 			const vid = mapDQ.cell(vertex, vd);
+// 			delta[vid] = new DualQuaternion(new THREE.Quaternion(0, 0, 0, 0), new THREE.Quaternion(0, 0, 0, 0));
+
+// 			let nbVerts = 0;
+// 			mapDQ.foreachDartOf(vertex, vd, d => {
+// 				delta[vid].add(delta[mapDQ.cell(vertex, mapDQ.phi(path, d))]);
+// 				++nbVerts;
+// 			});
+
+// 			DQs[vid].premultiply(delta[vid]).normalize()
+
+// 		}, {cache: faceVerticesCache});
+// 	}
+
+// 	mapDQ.removeAttribute(vertex, DQs2);
+// 	mapDQ.removeAttribute(vertex, delta);
+// }
 
 function CCDelta(approx = true) {
 	const vertex = mapDQ.vertex;
@@ -598,114 +610,6 @@ function CCDelta(approx = true) {
 
 
 
-// function CCDelta(approx = true) {
-// 	const vertex = mapDQ.vertex;
-// 	const edge = mapDQ.edge;
-// 	const face = mapDQ.face;
-
-// 	const DQs2 = mapDQ.addAttribute(vertex, "dq2");
-// 	const delta = mapDQ.addAttribute(vertex, "delta");
-
-// 	const initVerticesCache = mapDQ.cache(vertex);
-// 	const faceVerticesCache = [];
-// 	const edgeVerticesCache = [];
-
-// 	quadrangulateAllFaces(mapDQ,
-// 		vd => {
-// 			edgeVerticesCache.push(vd);
-
-// 			const vid = mapDQ.cell(vertex, vd);
-// 			DQs[vid] = new DualQuaternion(new THREE.Quaternion(0, 0, 0, 0), new THREE.Quaternion(0, 0, 0, 0));
-// 			mapDQ.foreachDartOf(vertex, vd, d => {
-// 				DQs[vid].add(DQs[mapDQ.cell(vertex, mapDQ.phi2[d])])
-// 			});
-// 			DQs[vid].multiplyScalar(0.5).normalize();
-// 		},
-// 		vd => {
-// 			faceVerticesCache.push(vd);
-
-// 			const vid = mapDQ.cell(vertex, vd);
-// 			let nbEdges = 0;
-// 			DQs[vid] = new DualQuaternion(new THREE.Quaternion(0, 0, 0, 0), new THREE.Quaternion(0, 0, 0, 0));
-// 			mapDQ.foreachDartOf(vertex, vd, d => {
-// 				DQs[vid].add(DQs[mapDQ.cell(vertex, mapDQ.phi([1, 1], d))]);
-// 				++nbEdges;
-// 			});
-// 			DQs[vid].multiplyScalar(1 / nbEdges).normalize();
-// 		}
-// 	);
-
-// 	mapDQ.foreach(vertex, vd => {
-// 		const vid = mapDQ.cell(vertex, vd);
-// 		DQs2[vid] = DQs[vid];
-// 		DQs[vid] = new DualQuaternion(new THREE.Quaternion(0, 0, 0, 0), new THREE.Quaternion(0, 0, 0, 0));
-
-// 		mapDQ.foreachDartOf(vertex, vd, d => {
-// 			DQs[vid].add(DQs[mapDQ.cell(vertex, mapDQ.phi1[d])]);
-// 		});
-
-// 		DQs[vid].multiplyScalar(0.25).normalize()
-
-// 	}, {cache: edgeVerticesCache});
-
-// 	mapDQ.foreach(vertex, vd => {
-// 		const vid = mapDQ.cell(vertex, vd);
-
-// 		let n = 0;
-// 		const F = new DualQuaternion(new THREE.Quaternion(0, 0, 0, 0), new THREE.Quaternion(0, 0, 0, 0));
-// 		const E = new DualQuaternion(new THREE.Quaternion(0, 0, 0, 0), new THREE.Quaternion(0, 0, 0, 0));
-// 		const P = DQs[vid].clone();
-// 		mapDQ.foreachDartOf(vertex, vd, d => {
-// 			F.add(DQs[mapDQ.cell(vertex, mapDQ.phi([1, 1, 2], d))]);
-// 			E.add(DQs[mapDQ.cell(vertex, mapDQ.phi1[d])]);
-// 			++n;
-// 		});
-
-// 		F.multiplyScalar(1/n);
-// 		E.multiplyScalar(2/n);
-// 		P.multiplyScalar(n - 3);
-// 		P.add(F).add(E).multiplyScalar(1/n).normalize();
-
-// 		DQs2[vid] = P;
-// 		delta[vid] = DQs2[vid].clone().multiply(DQs[vid].clone().invert())
-
-// 	}, {cache: initVerticesCache});
-
-
-// 	if(approx)
-// 		mapDQ.foreach(vertex, vd => {
-// 			const vid = mapDQ.cell(vertex, vd);
-// 			DQs[vid].copy(DQs2[vid])
-// 		}, {cache: initVerticesCache});
-// 	else {
-// 		let path = [1, 2];
-// 		mapDQ.foreach(vertex, vd => {
-// 			const vid = mapDQ.cell(vertex, vd);
-// 			delta[vid] = new DualQuaternion(new THREE.Quaternion(0, 0, 0, 0), new THREE.Quaternion(0, 0, 0, 0));
-
-// 			let nbVerts = 0;
-// 			mapDQ.foreachDartOf(vertex, vd, d => {
-// 				delta[vid].add(delta[mapDQ.cell(vertex, mapDQ.phi(path, d))]);
-// 				++nbVerts;
-// 			});
-
-// 			DQs[vid].premultiply(delta[vid]).normalize()
-
-// 		}, {cache: faceVerticesCache});
-// 	}
-// 	mapDQ.foreach(vertex, vd => {
-// 		const vid = mapDQ.cell(mapDQ.vertex, vd);
-// 		const dq = DQs[vid];
-// 		const pos = dq.transform(new THREE.Vector3());
-
-// 		DQpos[vid] = pos;
-// 	});
-// 	mapDQ.removeAttribute(vertex, DQs2);
-// 	mapDQ.removeAttribute(vertex, delta);
-// }
-
-
-
 
 // catmullClarkDQ()
 // catmullClark(map)
@@ -730,10 +634,6 @@ function CCDelta(approx = true) {
 // CCDelta(true);
 // CCDelta(true);
 // CCDelta(false);
-// CCDelta(false);
-// CCDelta(false);
-// CCDelta(false);
-// CCDelta(false);
 // CCDeltaApprox(mapDQ);
 
 catmullClarkDQ()
@@ -746,12 +646,10 @@ catmullClarkDQ()
 // catmullClarkDQ()
 // catmullClarkDQ()
 // catmullClarkDQ()
-// catmullClark_inter(map)
-// catmullClark_inter(map)
-// catmullClark_inter(map)
-catmullClark(map)
-catmullClark(map)
-catmullClark(map)
+// // catmullClark_inter(map)
+// catmullClark(map)
+// catmullClark(map)
+// catmullClark(map)
 // catmullClark(map)
 // catmullClark(map)
 // catmullClark(map)
@@ -777,10 +675,10 @@ verticesDQ()
 const mapRenderer = new Renderer(map);
 // mapRenderer.vertices.create()
 // mapRenderer.vertices.addTo(scene)
-// mapRenderer.edges.create({color: 0x2020A0, size: 1})
+// mapRenderer.edges.create({color: 0x2020A0, size: 0.1})
 // mapRenderer.edges.addTo(scene)
-mapRenderer.faces.create({color: new THREE.Color(0xbbbbff), wireframe:false, transparent: true, opacity: 0.5})
-mapRenderer.faces.addTo(scene)
+mapRenderer.faces.create({color: new THREE.Color(0xff5555), wireframe:false, transparent: true, opacity: 0.5})
+// mapRenderer.faces.addTo(scene)
 
 
 const mapDQRenderer = new Renderer(mapDQ);
@@ -828,7 +726,6 @@ const defaultKeyUp = function(event){
 
 window.addEventListener("keydown", defaultKeyDown);
 window.addEventListener("keyup", defaultKeyUp);
-
 
 
 const grid = new THREE.GridHelper(1, 10)
