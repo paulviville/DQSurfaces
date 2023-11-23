@@ -13,14 +13,14 @@ import * as DAT from './CMapJS/Libs/dat.gui.module.js';
 
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xeeeeee);
+scene.background = new THREE.Color(0xffffff);
 const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.001, 1000.0);
 camera.position.set(0, 0.5, 1.5);
 const renderer = new THREE.WebGLRenderer({antialias: true});
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
 
-let ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
+let ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
 scene.add(ambientLight);
 let pointLight0 = new THREE.PointLight(0xffffff, 1);
 pointLight0.position.set(0,1.5,2);
@@ -38,7 +38,7 @@ window.addEventListener('resize', function() {
 });
 
 
-const red = new THREE.MeshBasicMaterial({color: 0xff0000, wireframe: false});
+const red = new THREE.MeshPhongMaterial({color: 0xff0000, wireframe: false});
 const green = new THREE.MeshLambertMaterial({color: 0x00ff00, wireframe: true});
 const blue = new THREE.MeshLambertMaterial({color: 0x0000ff, wireframe: true});
 const yellow = new THREE.MeshLambertMaterial({color: 0xffff00, wireframe: true});
@@ -136,7 +136,7 @@ for(let i = 0; i < 4; ++i) {
 
 
 const samples = [];
-const nbSamples = 150;
+const nbSamples = 250;
 
 
 
@@ -223,7 +223,7 @@ const conesDQ = new THREE.InstancedMesh(geometryControlCone, red, 16);
 scene.add(conesDQ)
 
 function setCones() {
-	const scale = new THREE.Vector3(1, 1, 1);
+	const scale = new THREE.Vector3(1.3, 1.3, 1.3);
 	const matrix = new THREE.Matrix4
 	for(let i = 0; i < 16; ++i) {
 		matrix.compose(DQ[i].getTranslation(), DQ[i].getRotation(), scale);
