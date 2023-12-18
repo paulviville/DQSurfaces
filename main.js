@@ -106,14 +106,7 @@ function randomize(quat) {
 
 
 
-const dq0 = new DualQuaternion(r0, t0.clone().multiply(r0).multiplyScalar(0.5));
-const dq1 = new DualQuaternion(r1, t1.clone().multiply(r1).multiplyScalar(0.5));
-const dq2 = new DualQuaternion(r2, t2.clone().multiply(r2).multiplyScalar(0.5));
-const dq3 = new DualQuaternion(r3, t3.clone().multiply(r3).multiplyScalar(0.5));
-const dq4 = new DualQuaternion(r4, t4.clone().multiply(r4).multiplyScalar(0.5));
-const dq5 = new DualQuaternion(r5, t5.clone().multiply(r5).multiplyScalar(0.5));
-const dq6 = new DualQuaternion(r6, t6.clone().multiply(r6).multiplyScalar(0.5));
-const dq7 = new DualQuaternion(r7, t7.clone().multiply(r7).multiplyScalar(0.5));
+
 
 const T = []
 const R = []
@@ -136,6 +129,7 @@ for(let i = 0; i < 4; ++i) {
 
 
 const samples = [];
+const samplesVec = [];
 const nbSamples = 250;
 
 
@@ -207,13 +201,83 @@ function polyInter() {
 polyInter()
 
 
+function polyInterVec() {
+
+	const U = [0, 0.33, 0.66, 1];
+	const V = [0, 0.33, 0.66, 1];
+
+	const step = 1 / (nbSamples - 1);
+	const curves = [];
+	
+	for(let line = 0; line < 4; ++line) {
+		curves[line] = [];
+		let id = 4*line;
+		const dqs = [DQ[id].getTranslation(), DQ[id+1].getTranslation(), DQ[id+2].getTranslation(), DQ[id+3].getTranslation()];
+
+		for(let r = 0; r < nbSamples; ++r) {
+			const t = r*step;
+			const dqs2 = dqs.map(dq => dq.clone())
+			for(let i = 0; i < dqs.length - 1; ++i) {
+				for(let j = 0; j < dqs.length - i - 1; ++j) {
+					let t0 = j;
+					let t1 = i + j + 1;
+
+					// console.log(t0, t1)
+
+					let c0 = (U[t1]-t) / (U[t1]-U[t0]);
+					let c1 = (t-U[t0]) / (U[t1]-U[t0]);
+
+					dqs2[j].multiplyScalar(c0);
+					dqs2[j].addScaledVector(dqs2[j+1], c1);
+				}
+			}
+			curves[line].push(dqs2[0])
+		}
+	}
+
+	for(let s = 0; s < nbSamples; ++s) {
+		const dqs = [curves[0][s].clone(), curves[1][s].clone(), curves[2][s].clone(), curves[3][s].clone()];
+		let p0 = curves[0][s].clone();
+		let p1 = curves[1][s].clone();
+		let p2 = curves[2][s].clone();
+		let p3 = curves[3][s].clone();
+		let p0_ = new THREE.Vector3();
+		let p1_ = new THREE.Vector3();
+		let p2_ = new THREE.Vector3();
+		for(let r = 0; r < nbSamples; ++r) {
+			const t = r*step;
+			const dqs2 = dqs.map(dq => dq.clone())
+			for(let i = 0; i < dqs.length - 1; ++i) {
+				for(let j = 0; j < dqs.length - i - 1; ++j) {
+					let t0 = j;
+					let t1 = i + j + 1;
+
+					let c0 = (V[t1]-t) / (V[t1]-V[t0]);
+					let c1 = (t-V[t0]) / (V[t1]-V[t0]);
+
+					dqs2[j].multiplyScalar(c0);
+					dqs2[j].addScaledVector(dqs2[j+1], c1);
+				}
+			}
+			samplesVec[s * nbSamples + r] = dqs2[0].clone()
+		}
+
+	}
+}
+
+
+
 
 const surfaceGeometry = new THREE.PlaneGeometry(1, 1, nbSamples-1, nbSamples-1);
-const surfaceMaterial1 = new THREE.MeshLambertMaterial({color: 0xbbbbff, wireframe: false, side: THREE.DoubleSide});
-const surfaceMaterial2 = new THREE.MeshLambertMaterial({color: 0x000000, wireframe: true, side: THREE.DoubleSide});
+const surfaceGeometry2 = new THREE.PlaneGeometry(1, 1, nbSamples-1, nbSamples-1);
+const surfaceMaterial1 = new THREE.MeshLambertMaterial({color: 0xbbbbff, wireframe: true, side: THREE.DoubleSide});
+const surfaceMaterial2 = new THREE.MeshLambertMaterial({color: 0xffbbbb, wireframe: true, side: THREE.DoubleSide});
 const surfaceMesh = new THREE.Mesh(surfaceGeometry, surfaceMaterial1)
+const surfaceMesh2 = new THREE.Mesh(surfaceGeometry2, surfaceMaterial2)
 scene.add(surfaceMesh)
+scene.add(surfaceMesh2)
 console.log(surfaceMesh)
+
 
 
 
@@ -236,6 +300,39 @@ function setCones() {
 }
 setCones();
 
+const geometryControlSphere = new THREE.SphereGeometry(0.005, 16, 16, 1);
+const spheresDQ = new THREE.InstancedMesh(geometryControlSphere, red, 16);
+scene.add(spheresDQ)
+
+function setspheres() {
+	const scale = new THREE.Vector3(1.3, 1.3, 1.3);
+	const matrix = new THREE.Matrix4
+	for(let i = 0; i < 16; ++i) {
+		matrix.compose(DQ[i].getTranslation(), DQ[i].getRotation(), scale);
+		// let dir = new THREE.Vector3(0, 1, 0).applyQuaternion(DQ[i].getRotation());
+		spheresDQ.setMatrixAt(i, matrix);
+		// spheresDQ.setColorAt(i, new THREE.Color(Math.abs(dir.x), Math.abs(dir.y), Math.abs(dir.z)))
+	}
+	spheresDQ.instanceMatrix.needsUpdate = true
+	// spheresDQ.instanceColor.needsUpdate = true
+}
+setspheres();
+
+window.toggleVec= function() {
+	spheresDQ.visible = ! spheresDQ.visible;
+	surfaceMesh2.visible = !surfaceMesh2.visible
+}
+
+window.toggledq= function() {
+	conesDQ.visible = ! conesDQ.visible;
+	surfaceMesh.visible = !surfaceMesh.visible
+}
+
+window.toggleWire = function() {
+	surfaceMaterial1.wireframe = ! surfaceMaterial1.wireframe
+	surfaceMaterial2.wireframe = ! surfaceMaterial2.wireframe
+}
+
 const geometrySample = new THREE.BoxGeometry(0.002, 0.00003125, 0.012, 16, 1);
 // const geometrySample = new THREE.ConeGeometry(0.005, 0.025, 16, 1);
 
@@ -248,11 +345,11 @@ function setSamples() {
 	for(let s = 0; s < samples.length; ++s) {
 		matrix.compose(samples[s].getTranslation(), samples[s].getRotation(), scale);
 		samplesDQ.setMatrixAt(s, matrix);
-		let dir = new THREE.Vector3(0, 1, 0).applyQuaternion(samples[s].getRotation());
-		samplesDQ.setColorAt(s, new THREE.Color(Math.abs(dir.x), Math.abs(dir.y), Math.abs(dir.z)))
+		// let dir = new THREE.Vector3(0, 1, 0).applyQuaternion(samples[s].getRotation());
+		// samplesDQ.setColorAt(s, new THREE.Color(Math.abs(dir.x), Math.abs(dir.y), Math.abs(dir.z)))
 	}
 	samplesDQ.instanceMatrix.needsUpdate = true
-	samplesDQ.instanceColor.needsUpdate = true
+	// samplesDQ.instanceColor.needsUpdate = true
 
 	for(let s = 0; s < samples.length; ++s) {
 		const pos = samples[s].getTranslation();
@@ -264,16 +361,36 @@ function setSamples() {
 }
 setSamples()
 
+function setSamplesVec() {
+	const scale = new THREE.Vector3(0.5, 0.5, 0.5);
+	const matrix = new THREE.Matrix4
+	// for(let s = 0; s < samples.length; ++s) {
+	// 	matrix.compose(samples[s], new THREE.Quaternion, scale);
+	// 	samplesDQ.setMatrixAt(s, matrix);
+	// 	// let dir = new THREE.Vector3(0, 1, 0).applyQuaternion(samples[s].getRotation());
+	// 	// samplesDQ.setColorAt(s, new THREE.Color(Math.abs(dir.x), Math.abs(dir.y), Math.abs(dir.z)))
+	// }
+	// samplesDQ.instanceMatrix.needsUpdate = true
+	// samplesDQ.instanceColor.needsUpdate = true
 
-window.randRotate = function(i)  {
-	R[i] = randomize(R[i]);
-	DQ[i] = new DualQuaternion(R[i], T[i].clone().multiply(R[i]).multiplyScalar(0.5));
-
+	for(let s = 0; s < samples.length; ++s) {
+		// const pos = samples[s].getTranslation();
+		surfaceMesh2.geometry.vertices[s].copy(samplesVec[s]);
+	}
+	surfaceMesh2.geometry.verticesNeedUpdate = true;
+	surfaceMesh2.geometry.computeVertexNormals();
+	surfaceMesh2.geometry.normalsNeedUpdate = true;
+}
+function updateSurface() {
+	polyInterVec()
 	polyInter()
 	setCones();
+	setspheres();
+	setSamplesVec();
 	setSamples();
 }
 
+updateSurface()
 let selected = 0;
 const controls = {
 rotX: function() {
@@ -281,9 +398,8 @@ rotX: function() {
 	const dq = DualQuaternion.setFromRotation(rot);
 	DQ[selected].multiply(dq).normalize();
 
-	polyInter()
-	setCones();
-	setSamples();
+	updateSurface()
+
 },
 
 rot_X: function(i) {
@@ -291,9 +407,7 @@ rot_X: function(i) {
 	const dq = DualQuaternion.setFromRotation(rot);
 	DQ[selected].multiply(dq).normalize();
 
-	polyInter()
-	setCones();
-	setSamples();
+	updateSurface()
 },
 
 rotY: function(i) {
@@ -301,9 +415,7 @@ rotY: function(i) {
 	const dq = DualQuaternion.setFromRotation(rot);
 	DQ[selected].multiply(dq).normalize();
 
-	polyInter()
-	setCones();
-	setSamples();
+	updateSurface()
 },
 
 rot_Y: function(i) {
@@ -311,9 +423,7 @@ rot_Y: function(i) {
 	const dq = DualQuaternion.setFromRotation(rot);
 	DQ[selected].multiply(dq).normalize();
 
-	polyInter()
-	setCones();
-	setSamples();
+	updateSurface()
 },
 
 rotZ: function(i) {
@@ -321,9 +431,7 @@ rotZ: function(i) {
 	const dq = DualQuaternion.setFromRotation(rot);
 	DQ[selected].multiply(dq).normalize();
 
-	polyInter()
-	setCones();
-	setSamples();
+	updateSurface()
 },
 
 rot_Z: function(i) {
@@ -331,9 +439,7 @@ rot_Z: function(i) {
 	const dq = DualQuaternion.setFromRotation(rot);
 	DQ[selected].multiply(dq).normalize();
 
-	polyInter()
-	setCones();
-	setSamples();
+	updateSurface()
 },
 
 transX: function(i) {
@@ -341,9 +447,7 @@ transX: function(i) {
 	const dq = DualQuaternion.setFromRotationTranslation(new THREE.Quaternion, trans);
 	DQ[selected].multiply(dq).normalize();
 
-	polyInter()
-	setCones();
-	setSamples();
+	updateSurface()
 },
 
 transY: function(i) {
@@ -351,9 +455,7 @@ transY: function(i) {
 	const dq = DualQuaternion.setFromRotationTranslation(new THREE.Quaternion, trans);
 	DQ[selected].multiply(dq).normalize();
 
-	polyInter()
-	setCones();
-	setSamples();
+	updateSurface()
 },
 
 transZ: function(i) {
@@ -361,9 +463,7 @@ transZ: function(i) {
 	const dq = DualQuaternion.setFromRotationTranslation(new THREE.Quaternion, trans);
 	DQ[selected].multiply(dq).normalize();
 
-	polyInter()
-	setCones();
-	setSamples();
+	updateSurface()
 },
 
 trans_X: function(i) {
@@ -371,9 +471,7 @@ trans_X: function(i) {
 	const dq = DualQuaternion.setFromRotationTranslation(new THREE.Quaternion, trans);
 	DQ[selected].multiply(dq).normalize();
 
-	polyInter()
-	setCones();
-	setSamples();
+	updateSurface()
 },
 
 trans_Y: function(i) {
@@ -381,9 +479,7 @@ trans_Y: function(i) {
 	const dq = DualQuaternion.setFromRotationTranslation(new THREE.Quaternion, trans);
 	DQ[selected].multiply(dq).normalize();
 
-	polyInter()
-	setCones();
-	setSamples();
+	updateSurface()
 },
 
 trans_Z: function(i) {
@@ -391,9 +487,7 @@ trans_Z: function(i) {
 	const dq = DualQuaternion.setFromRotationTranslation(new THREE.Quaternion, trans);
 	DQ[selected].multiply(dq).normalize();
 
-	polyInter()
-	setCones();
-	setSamples();
+	updateSurface()
 },
 }
 
